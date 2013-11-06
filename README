@@ -1,0 +1,54 @@
+Last updated: 09/02/2013 (Matt Shanahan)
+(This readme assumes that the parser is being run from /Users/Shared/Logeion_parsers
+on grade; otherwise, substitute your working directory for that. If you ARE running
+it on grade at that location, [brackets] indicate file locations relative to you.)
+
+A few quick terms:
+    lemmastoknow.sqlite:    A db for keeping track of point changes to textbook
+                            dicos and lemma frequencies (for textbooks); used to
+                            generate source files for logeion_parse.py and as a
+                            source for new frequency information. Located in [./].
+    (greek|latin)Info.db:   Contains non-entry data for lemmas, i.e. collocations,
+                            lemma frequencies, frequencies/author, etc. Located in
+                            Logeion's cgi dir.
+    lexicon:                The most recent version of the lexicon of whatever language
+                            is being used; at the time of writing, the Greek one is
+                            GreekLexiconNov2011.db and the Latin one is LatinLexicon.db,
+                            both in /Users/Shared/Lexica on grade. (Its use in the
+                            actually operation of Logeion might be deprecated; I'll
+                            have to check.)
+
+The process for updating Logeion:
+    I)   GATHER TEXTS
+        1)  Make sure correct source files are in the target dictionary directories
+            [./dictionaries/] for non-Greek-textbook dictionaries (i.e. not Mastronarde,
+            HansenQuinn, JACT, or LTRG).
+        2)  IF WORKING WITH LEMMASTOKNOW: run grab_lemmastoknow.py [./scripts/]:
+                $ scripts/grab_lemmastoknow.py dico ...
+                  dico := [HQ | Mastro | LTRG | JACT | shortdefs | all]
+            Use "all" to get all textbook tables; .dat files will appear in the
+            current directory named after the to-lowercase name of the table
+            (e.g. Mastro -> mastro.dat, HQ -> hq.dat, etc.).
+        3)  Check the parsers [./parsers/*] to make sure they point to the correct
+            files [./dictionaries/*/]. (If you haven't changed any of the filenames,
+            they're probably correct.)
+    II)  PARSE TEXTS
+            Run logeion_parse.py [./]:
+                $ ./logeion_parse.py --all
+            The output should hopefully be illuminating; the process should take
+            a few minutes. A log of any parser errors (hopefully none) will be
+            piped to parser.log [./]. The file new_dvlg-wheel.sqlite [./] is the
+            final product. (If you want to see other options for running logeion_parse.py,
+            do
+                $ ./logeion_parse.py -h
+            for a full list and explanations.)
+    III) DEPLOYMENT AND OTHER UPDATES
+        1)  Copy new_dvlg-wheel.sqlite (or whatever you named it) to the cgi dir for
+            Logeion (at the time of writing, /var/lib/www/logeion/cgi-bin/ on
+            emile.lib.uchicago.edu); make sure it is named dvlg-wheel.sqlite.
+        2)  Also copy lemmastoknow.sqlite to emile, and run update_frequencies.py:
+                $ scripts/update_frequencies.py LEMMASTOKNOW_DB INFO_DB
+            This script will update INFO_DB (most likely greekInfo.db) based on
+            lemmastoknow.sqlite. After it's done running, copy the info db back to
+            the cgi dir.
+        3)  If there is a newer version of the lexicon, copy it to the cgi dir.

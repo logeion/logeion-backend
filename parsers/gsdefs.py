@@ -1,0 +1,19 @@
+import re
+from glob import glob
+
+name = 'GreekShortDefs'
+type = 'greek'
+caps = 'precapped'
+
+def parse(dico_path):
+    xmlfile = dico_path+'/shortdefs.dat'
+    dico = []
+    tobelogged = {'warning': [], 'info': []}
+    
+    for line in open(xmlfile):
+        head, content = line.strip().split('\t')
+        attrs = {'head': head, 'content': content}
+        dico.append(attrs)
+    tobelogged['info'].append('%s finished parsing' % xmlfile.split('/')[-1])
+    dico = sorted(dico, key=lambda e: e['head'])
+    return dico, tobelogged
