@@ -224,8 +224,20 @@ def removediacr(greek):
     newugreek = u''.join(c for c in unicodedata.normalize('NFD', ugreek) if unicodedata.category(c) != 'Mn')
     return newugreek.encode('utf-8')
 
+# False if character is a combining breve/macron mark,
+# true otherwise; used to flatten headwords to lookupforms
+def not_length_marker(c):
+    return unicodedata.category(c) != 'Mn' or \
+           not ('BREVE' in unicodedata.name(c) or \
+                'MACRON' in unicodedata.name(c))
+
 # Changes a headword to a lookupform-acceptable entry
 def change_to_lookup(head):
+    if type(head) is str:
+        head = head.decode('utf-8')
+    tmp = unicodedata.normalize('NFD', head)
+    head = ''.join([c for c in tmp if not_length_marker(c)])
+    head = unicodedata.normalize('NFC', head) # recombine characters
     return re.sub('[0-9\[\]]', '', head)
 
 # Stores each dico
