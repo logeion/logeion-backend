@@ -3,13 +3,12 @@ logeion-backend
 
 Backend scripts, files, etc. for parsing/updating dictionaries.
 
-PROCESS FOR UPDATING LOGEION
+Process for updating Logeion
 ----------------------------
 
 NB: If you're running any of the Logeion generating scripts, run them in the top-level
     Logeion dir (i.e. /Users/Shared/Logeion_parsers on grade)
 
-UPDATING THE DATABASE
 *   To grab Latin and Greek shortdefs, first run:
         $ scripts/update_shortdefs.py <lemmastoknow> <lexicon>
     This will update the lemmastoknow file with modified entries from the lexicon. Then,
@@ -27,7 +26,7 @@ UPDATING THE DATABASE
     If you're only generating data for one dictionary, then run:
         $ ./logeion_parse.py <dico> --db path/to/database.db
 
-ADDING A NEW DICTIONARY
+Adding a new dictionary
 -----------------------
 *   A parser script must have: 
     a) a method called "parse" which returns a dict of values, formatted 
@@ -53,7 +52,7 @@ ADDING A NEW DICTIONARY
     given that they have the appropriate types. It finds the xml files based on the
     "name" property in the parser file.
 
-MORE ON CLEANING UP DICOS
+More on cleaning up dicos
 -------------------------
 *   It's been the practice to modify textbook entries by adding the unmodified lemma to the
     beginning of the entry content.  For example, {'amatus, -a, -um': 'beloved'} would be 
