@@ -10,7 +10,7 @@ import sys
 import urllib2
 
 dict_home    = '/Volumes/data/var/lib/philologic/databases/LatinAugust2012'
-info_db      = './latinInfo.db'
+infodb      = './latinInfo.db'
 lemmafile    = dict_home + '/frequencies/lemmafile'
 lexicon      = '/Library/WebServer/CGI-Executables/perseus/LatinLexicon.db'
 countbydocid = dict_home  + '/countbydocid'
@@ -53,7 +53,7 @@ def flatten_mappings(docid2count, author2texts):
 
 def usage(prog):
     print 'Usage: %s [options]' % prog
-    print '    --info-db <info-db>'
+    print '    --infodb <info-db>'
     print '    --lemmafile <lemma-file>'
     print '    --lexicon <lexicon>'
     print '    --countbydocid <countbydocid-file>'
@@ -61,14 +61,14 @@ def usage(prog):
     print '    --help'
 
 def parse_arguments(args):
-    global info_db, lemmafile, lexicon, countbydocid, bibliography, prog
+    global infodb, lemmafile, lexicon, countbydocid, bibliography, prog
     args = sys.argv[1:]
     argc = len(args)
     i = 0
     while i < argc:
         try:
-            if args[i] == '--info-db':
-                info_db = args[i+1]
+            if args[i] == '--infodb':
+                infodb = args[i+1]
                 i += 2
             elif args[i] == '--lemmafile':
                 lemmafile = args[i+1]
@@ -95,11 +95,11 @@ def parse_arguments(args):
             sys.exit(1)
 
 def main():
-    global info_db, lemmafile, lexicon, countbydocid, bibliography, prog
+    global infodb, lemmafile, lexicon, countbydocid, bibliography, prog
     prog = sys.argv[0].split('/')[-1]
     parse_arguments(sys.argv[1:])
         
-    print 'Using ' + info_db + ' as info db'
+    print 'Using ' + infodb + ' as info db'
     print 'Using ' + lemmafile + ' as lemma file'
     print 'Using ' + lexicon + ' as lexicon'
     print 'Using ' + countbydocid + ' as countbydocid file'
@@ -130,21 +130,21 @@ def main():
         sys.exit(1)
 
     try:
-        open(info_db).close()
+        open(infodb).close()
     except IOError, e: # If file doesn't exist, keep going
         pass
     else: # Otherwise, check that it's writeable and actually a SQLite db
         try:
-            open(info_db, 'a').close()
-            #with sqlite3.connect(info_db) as tmp_conn:
+            open(infodb, 'a').close()
+            #with sqlite3.connect(infodb) as tmp_conn:
             #    tmp_conn.cursor().execute('select * from sqlite_master')
-            sqlite3.connect(info_db).cursor().execute('select * from sqlite_master')
+            sqlite3.connect(infodb).cursor().execute('select * from sqlite_master')
 
         except IOError, e:
             print >> sys.stderr, '%s: %s' % (prog, str(e))
             sys.exit(1)
         except sqlite3.DatabaseError, e:
-            print >> sys.stderr, '%s: error reading %s: %s' % (prog, info_db, str(e))
+            print >> sys.stderr, '%s: error reading %s: %s' % (prog, infodb, str(e))
             sys.exit(1)
 
     # Slower, but less memory-hungry; we'll sort out actual lemmas
@@ -178,9 +178,9 @@ def main():
             texts2authors[t[0]] = author
 
     print 'Inserting results into db...'
-    #with sqlite3.connect(info_db) as info_conn:
+    #with sqlite3.connect(infodb) as info_conn:
     #    with sqlite3.connect(lexicon) as lex_conn:
-    info_conn = sqlite3.connect(info_db)
+    info_conn = sqlite3.connect(infodb)
     lex_conn = sqlite3.connect(lexicon)
     info_cursor = info_conn.cursor()
     info_cursor.executescript("""

@@ -164,8 +164,9 @@ def clean_one_entry(data):
         sm.currentLevel -= 1
     return sm.content
 
-# Hammer XML so that it fits basic specifications, then clean and convert into
-# rational HTML
+# Hammer XML so that it fits basic specifications, then clean
+# and convert into rational HTML; does it for every dictionary
+# except for DGE and DuCange
 def clean_xml_and_convert(dico_parsed):
     for i in range(len(dico_parsed)):
         content = dico_parsed[i]['content']
@@ -231,10 +232,15 @@ def not_length_marker(c):
            not ('BREVE' in unicodedata.name(c) or \
                 'MACRON' in unicodedata.name(c))
 
-# Changes a headword to a lookupform-acceptable entry
+# Changes a headword to a lookupform-acceptable entry; remove
+# all non-essential diacritics (e.g. macrons and breves), as
+# well as extra digits and slashes
 def change_to_lookup(head):
     if type(head) is str:
-        head = head.decode('utf-8')
+        try:
+            head = head.decode('utf-8')
+        except UnicodeDecodeError:
+            head = head.decode('latin1')
     tmp = unicodedata.normalize('NFD', head)
     head = ''.join([c for c in tmp if not_length_marker(c)])
     head = unicodedata.normalize('NFC', head) # recombine characters
@@ -386,7 +392,9 @@ for dico in dicos:
     	# Loads entries to SQLite table
         sys.stdout.write('\t%s:%sloading\r' % (dico, spcs))
         sys.stdout.flush()
-        if dico not in ('GreekShortDefs', 'LatinShortDefs', 'BWL') and dico not in sidebar_dicos:
+        if dico not in ('GreekShortDefs', 'LatinShortDefs',
+                        'BWL', 'DuCange', 'DGE') \
+        and dico not in sidebar_dicos:
             dico_parsed = clean_xml_and_convert(dico_parsed)
         loaded_successfully = dico_loader(dico, dico_parsed)
         if tobelogged['warning']:

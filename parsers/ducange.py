@@ -34,7 +34,9 @@ def parse(dico_path):
         
     for xmlfile in dico_data:
         with open(xmlfile) as infh:
-            soup = BeautifulStoneSoup(infh)
+            # Adjust as necessary; if self-closing tags are not explicitly
+            # passed, then parser stops short
+            soup = BeautifulStoneSoup(infh, selfClosingTags=['pb','cb'])
             for entry in soup.findAll('entry'):
                 head = entry['xml:id']
 

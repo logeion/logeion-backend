@@ -9,17 +9,14 @@ type = 'greek'
 caps = 'precapped'
 
 # regex patterns
-find_head = re.compile('xml:id=".+?"')
-find_head2 = re.compile('<form rend="b">.+?</form>')
 clean_head = re.compile('xml:id=|"|<[/]?[^<>]*>|[0-9]')
-find_entry = re.compile('<entry')
-end_entry = re.compile('</entry>')
-nested_ws = re.compile('^[ ][ ]+')
+find_entry = re.compile('<entry.*?</entry>', re.S)
 
 # Gets rid of unnecessary tags, spacing, and chars in headword
 def cleanup_head(head):
-    head = clean_head.sub('', head).lower()
+    head = clean_head.sub('', head)
     head = re.sub('^[\s]*[.]|[.][\s]*$', '', head)
+    head = head.replace('_', ' ')
     return head
 
 # Main method
@@ -33,6 +30,7 @@ def parse(dico_path):
             soup = BeautifulStoneSoup(infh)
             for entry in soup.findAll('entry'):
                 head = entry['xml:id']
+                orth_orig = entry.find('orth', type='lemma').text
 
                 # Usually, the xml:id attr is more accurate, but it doesn't
                 # distinguish between a dash and whitespace, so we take form
@@ -45,7 +43,8 @@ def parse(dico_path):
                 try:
                     head = cleanup_head(head)
                     attrs = {'head': head.strip(),
-                             'content': str(entry).decode('utf-')}
+                             'orth_orig': orth_orig.strip().decode('utf-8'),
+                             'content': str(entry).decode('utf-8')}
                     dico.append(attrs)
                 except(Exception), e:
                     tobelogged['warning'].append("%s couldn't parse line \"%s\"...: %s" \

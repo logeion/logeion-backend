@@ -26,8 +26,8 @@ argc = len(args)
 i = 0
 while i < argc:
     try:
-        if args[i] == '--info-db':
-            info_db = args[i+1]
+        if args[i] == '--infodb':
+            infodb = args[i+1]
             i += 2
         elif args[i] == '--lemmafile':
             lemmafile = args[i+1]

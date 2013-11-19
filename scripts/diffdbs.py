@@ -4,12 +4,17 @@ import difflib, re, sqlite3, sys
 def validate_args(argv):
     do_quiet_output = False
     table_list = []
+    filters = []
     if '-q' in argv:
         do_quiet_output = True
         argv.remove('-q')
     if '-t' in argv:
         ind = argv.index('-t')
         table_list = argv[ind+1].split(',')
+        argv = argv[:ind] + argv[ind+2:]
+    if '-f' in argv:
+        ind = argv.index('-f')
+        filters = argv[ind+1].split(',')
         argv = argv[:ind] + argv[ind+2:]
     if len(argv) != 2:
         print >> sys.stderr, usage
@@ -21,7 +26,7 @@ def validate_args(argv):
     except IOError, e:
         print >> sys.stderr, '%s: %s' % (prog, str(e))
         sys.exit(1)
-    return db_from, db_to, do_quiet_output, table_list
+    return db_from, db_to, do_quiet_output, table_list, filters
 
 def validate_database(db):
     conn = sqlite3.connect(db)
@@ -51,18 +56,26 @@ def main():
     prog = sys.argv[0].split('/')[-1]
     usage =  'Usage: %s [-q] [-t table1,table2,...] <db1> <db2>\n' % prog
     usage += '    -q                    Quiet output; only display if tables differ\n'
-    usage += '    -t table1,table2,...  Only display data for given tables'
+    usage += '    -t table1,table2,...  Only display data for given tables\n'
+    usage += '    -f col1=val1,...      Filter by given data'
 
-    db_from, db_to, do_quiet_output, table_list = validate_args(sys.argv[1:])
+    db_from, db_to, do_quiet_output, table_list, filters = validate_args(sys.argv[1:])
     conn_from, cursor_from = validate_database(db_from)
     conn_to, cursor_to = validate_database(db_to)
 
     cursor_from.execute('select name from sqlite_master where type="table"')
+
     for table in [t[0] for t in cursor_from.fetchall()]:
         if table_list and table not in table_list:
             continue
-        cursor_from.execute('select * from ' + table)
-        cursor_to.execute('select * from ' + table)
+        if filters:
+            filter_string = ' and '.join(filters)
+            print filter_string
+            cursor_from.execute('select * from ' + table + ' where ' + filter_string)
+            cursor_to.execute('select * from ' + table + ' where ' + filter_string)
+        else:
+            cursor_from.execute('select * from ' + table)
+            cursor_to.execute('select * from ' + table)
         no_error = True
         try:
             lines_from = rows2lines(cursor_from.fetchall())
