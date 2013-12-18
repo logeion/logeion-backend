@@ -1,6 +1,5 @@
 *.py[cod]
 *.sqlite
-*.db
 *.log
 *.old
 *.bkup

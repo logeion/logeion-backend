@@ -26,9 +26,9 @@ prog = sys.argv[0].split('/')[-1]
 usage = """\
 Usage: %s [options] [dico ...]
     --all           Parse all dictionaries.
-    --latin         Parse only Latin dictionaries and references.
-    --greek         Parse only Greek dictionaries.
-    --sidebar       Parse only textbooks.
+    --latin         Parse Latin dictionaries and references (cumulative).
+    --greek         Parse Greek dictionaries (cumulative).
+    --sidebar       Parse textbooks (cumulative).
     --db <db>       Use <db> as output database instead of './new_dvlg-wheel.sqlite'.
     --level <level> Log at level <level>; default is INFO. Case-insensitive.
                     Options: %s""" \
@@ -321,7 +321,7 @@ while i < len(args):
     elif args[i] == '--greek': # parse Greek dicos
         dicos.update([(k,all_dicos[k]) for k in greek_dicos])
     elif args[i] == '--sidebar': # parse textbooks
-        dicos.update([(k,all_dicos[i]) for k in sidebar_dicos])
+        dicos.update([(k,all_dicos[k]) for k in sidebar_dicos])
     else: # all other args
         if args[i] in all_dicos:
             dicos[args[i]] = all_dicos[args[i]]
@@ -377,7 +377,6 @@ for dico in dicos:
     sys.stdout.flush()
     try:
         dico_parsed, tobelogged = getattr(dicos[dico], 'parse')('dictionaries/'+dico)
-        #dico_parsed, tobelogged = getattr(dicos[dico], 'parse')('dayj/dicos.clean/'+dico)
         logging.info(dico + ' finished parsing; applying html cleanup and inserting into db')
     except(Exception), e: # Either error in calling the actual function itself or in documenting normal error
         logging.warning('While parsing %s: %s' % (dico, e))
