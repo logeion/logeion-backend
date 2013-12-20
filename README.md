@@ -14,7 +14,7 @@ Logeion dir (i.e. /Users/Shared/Logeion_parsers on grade)
 
 1.  **If you are not parsing GreekShortDefs or LatinShortDefs, you may skip this step.**  
     To grab Latin and Greek shortdefs, first run:  
-        `$ scripts/update_shortdefs.py <lemmastoknow> <lexicon>`  
+        `$ scripts/update_shortdefs.py <lemmastoknow db> <lexicon db>`  
     This will update the lemmastoknow file with modified entries from the lexicon. Then,  
 
         $ scripts/grab_lemmastoknow.py <dico> ...
@@ -24,7 +24,7 @@ Logeion dir (i.e. /Users/Shared/Logeion_parsers on grade)
     spots in the dictionaries directory. Make sure that `lemmastoknow.sqlite` is in your
     current directory.
 2.  Then run:  
-        `$ ./logeion_parse.py <dico> ([ --latin | --greek | --sidebar ])* ...`  
+        `$ ./logeion_parse.py <name of dictionary> ([ --latin | --greek | --sidebar ])* ...`  
     to regenerate each dictionary. For example, if you want to parse GreekShortDefs, LatinShortDefs,
     and all of the textbooks, you would run:  
         `$ ./logeion_parse.py GreekShortDefs LatinShortDefs --sidebar`  
@@ -33,7 +33,7 @@ Logeion dir (i.e. /Users/Shared/Logeion_parsers on grade)
     When it's finished, the new database will be in the current directory as `new_dvlg-wheel.sqlite`.
     `parser.log` will detail any errors that the parsers reported. (They should also be visible on `STDOUT`.)
 3.  If you're only generating data for one dictionary, then run:  
-        `$ ./logeion_parse.py <dico>`  
+        `$ ./logeion_parse.py <name of dictionary>`  
     For any of the above, if you wish modify/create a specifically-named dictionary, use the
     `--db` option; for example, to reparse all of the Latin and Greek dictionaries in `dvlg-wheel.sqlite`,
     run:  
@@ -54,7 +54,7 @@ Adding a new dictionary
             + `name`: name of the dictionary (same as dictionary folder)  
             + `type`: `(latin|greek|sidebar)`  
             + `caps`: `(uncapped|source|precapped)`; `uncapped` means that capitalization needs to
-              be performed on it, `source` means that other uncapped dicos should
+              be performed on it, `source` means that other `uncapped` dictionaries should
               be compared to it, and `precapped` means that it shouldn't be touched during
               capitalization.  
     With regard to capitalization: if the lemmas are in all-caps in the source texts, then normalize
@@ -69,11 +69,11 @@ Adding a new dictionary
     `parsers/` directory as a plugins directory, i.e. it will automatically load all files in
     that directory and call them appropriately, given that they have the appropriate types.
     It finds the xml files based on the `name` property in the parser file.
-*   Put all the dico files to be parsed in `Logeion_parsers/dictionaries`, in a folder
+*   Put all the dictionary files to be parsed in `Logeion_parsers/dictionaries`, in a folder
     named the same as the dictionary. (E.g. `NewDico.xml` should be in `Logeion_parsers/dictionaries/NewDico`.)
    
 
-More on cleaning up dicos
+More on cleaning up dictionaries
 -------------------------
 *   It's been the practice to modify textbook entries by adding the unmodified lemma to
     the beginning of the entry          content.  For example, `{'amatus, -a, -um': 'beloved'}`
@@ -116,13 +116,13 @@ If you want to deploy Logeion to a new server, or want to check it out and test 
 follow these steps. (Sample databases are located
 <a href="https://sourceforge.net/p/logeion/files/?source=navbar">here</a>.)
 
-1.  **If you don't want to add your own dictionaries/data, skip this step.**  
+1.  **If you want to add your own dictionaries/data, follow this step; otherwise, go to step 2.**  
     Checkout the backend code. Follow the instructions for adding a new parser and putting the
     dictionary files in the correct places. If you want to generate a database with just your
     data, then run  
-        `$ ./logeion_parse.py <dico>`  
+        `$ ./logeion_parse.py <name of dictionary>`  
     If you want to add on to the provided `dvlg-wheel-mini.sqlite`, then run  
-        `$ ./logeion_parse.py <dico> --db dvlg-wheel-mini.sqlite`  
+        `$ ./logeion_parse.py <name of dictionary> --db dvlg-wheel-mini.sqlite`  
     (assuming `dvlg-wheel-mini.sqlite` is in your current directory).  
     If your dictionary is in CSV format or you want to preserve its current (X|HT)ML structure, then
     you will want to add its name (i.e. the value of the `name` property in the parser) to the tuple
@@ -132,7 +132,7 @@ follow these steps. (Sample databases are located
     on the `master` branch require the two directories `cgi-bin` and `html` to be siblings, though feel
     free to change this as needed.
 3.  Add all relevant databases to the CGI directory. Logeion requires `greekInfo.db`, `latinInfo.db`, and
-    `dvlg-wheel.sqlite` (either the one you just created or a renamed `dvlg-wheel-mini.sqlite`) to be in
-    the top level of the CGI directory.
+    `dvlg-wheel.sqlite`. For the last, you may also rename `dvlg-wheel-mini.sqlite` or edit
+    the CGI scripts so that they point to the correct file.
 4.  After configuring your server appropriately, you should be good to go! Direct any questions/issues to
     Helma Dik (helmadik@gmail.com) or Matt Shanahan (mrshanahan@uchicago.edu).
