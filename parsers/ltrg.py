@@ -1,3 +1,12 @@
+"""
+Sample entries:
+
+ἀγαθός	2
+ἀγορά	1
+ἄγω	5
+ἀγών	6
+"""
+
 import re
 from glob import glob
 

@@ -1,4 +1,18 @@
 # -*- coding: utf-8 -*-
+"""
+Sample entry:
+
+<div2 type="entry" id="abae-geo" org="uniform" sample="complete">
+  <head orig="ABAE">ABAE</head>
+  <p>
+    <label>ABAE</label>(<label lang="greek">Ἄβαι</label>. 
+    <title>Eth.</title><label lang="greek">Ἀβαῖος</label>: 
+    near <label>Exarkhó</label>, Ru.), 
+    an ancient town of Phocis, near the frontiers of the ...
+  </p>
+</div2>
+"""
+
 import re
 from glob import glob
 

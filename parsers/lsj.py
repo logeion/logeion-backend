@@ -1,4 +1,20 @@
 # -*- coding: utf-8 -*-
+"""
+Sample entry:
+
+<div2 id="crossa)a/baktoi" orig_id="n7" key="a)a/baktoi" type="gloss" opt="n">
+  <head extent="full" lang="greek" opt="n" orth_orig="ἀάβακτοι·">ἀάβακτοι</head>
+  <foreign lang="greek">ἀβλαβεῖς,</foreign> <author>Hsch.</author>;
+  cf. <orth extent="full" lang="greek" opt="n">ἀάβηκτον·</orth>
+  <foreign lang="greek">μέλαν, ἀβλαβές,</foreign>
+  <title>Et.Gud.</title> 
+  ( <sense id="n7.0" n="A" level="1" opt="n">
+    <cit>
+      <quote lang="greek">-βυκτον</quote> <author>Cyr.</author>
+    </cit>
+  ) </sense>
+</div2>
+"""
 import re
 from glob import glob
 

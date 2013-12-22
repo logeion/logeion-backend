@@ -1,4 +1,33 @@
 # -*- coding: utf-8 -*-
+"""
+Sample entry:
+
+<div1 type="entry" id="abai" org="uniform" sample="complete">
+  <head>Abai</head>
+  <subhead type="alt">Abae</subhead>
+  <div2 type="subentry" id="abai-1" org="uniform" sample="complete">
+    <subhead><placeName>Abai</placeName>, city of <placeName>Phocis</placeName></subhead>
+    <div3 type="index" org="uniform" sample="complete">
+      <list type="index">
+        <item>
+          <bibl n="Paus. 10.35.1-4" default="NO" valid="yes">Paus. 10.35.1-4</bibl>
+        </item>
+        <item>not destroyed after Sacred War:
+          <bibl n="Paus. 10.3.2" default="NO" valid="yes">Paus. 10.3.2</bibl>
+        </item>
+        <item>oracle at: <bibl n="Paus. 4.32.5" default="NO" valid="yes">Paus. 4.32.5</bibl>,
+          <bibl n="Paus. 10.35.1" default="NO" valid="yes">Paus. 10.35.1</bibl>,
+          <bibl n="Hdt. 1.46" default="NO" valid="yes">Hdt. 1.46</bibl>,
+          <bibl n="Hdt. 8.27" default="NO" valid="yes">Hdt. 8.27</bibl>,
+          <bibl n="Hdt. 8.33" default="NO" valid="yes">Hdt. 8.33</bibl>,
+          <bibl n="Hdt. 8.134" default="NO" valid="yes">Hdt. 8.134</bibl>
+        </item>
+      </list>
+    </div3>
+  </div2>
+</div1>
+"""
+
 import re
 from glob import glob
 

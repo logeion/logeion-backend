@@ -1,4 +1,18 @@
 # -*- coding: utf-8 -*-
+"""
+Sample entry:
+
+<div1 id="crossa)/atos1" orig_id="n3" key="a)/atos1">
+  <p />
+  <head extent="full" lang="greek" opt="n" orth_orig="a)/atos">ἄατος</head>
+  <etym opt="n"><foreign lang="greek">ἄω</foreign> C</etym>
+  <sense level="0" n="0" id="n3.0" opt="n">
+    <trans opt="n"><i>insatiate</i></trans>,
+    c. gen., <foreign lang="greek">Ἄρης ἆτος πολέμοιο</foreign>
+    <usg opt="n">Il.</usg>
+  </sense>
+</div1>
+"""
 import re
 from glob import glob
 

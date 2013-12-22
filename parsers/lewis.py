@@ -1,4 +1,20 @@
 # -*- coding: utf-8 -*-
+"""
+Sample entry:
+
+<div2 id="crossa^vus" orig_id="n1666" key="a^vus">
+  <head extent="full" lang="la" opt="n" orth_orig="avus">avus</head>ī,
+  <gen opt="n">m</gen>
+  <sense id="n1666.0" level="0" n="0" opt="n">
+    <etym lang="la" opt="n">1 AV-</etym>,
+    <i><i>a grandfather</i></i>: <foreign lang="la">huius: maternus</foreign>,
+    <usg opt="n">L.</usg>—Of bees, <i><i>a grandsire</i></i>,
+    <usg opt="n">V.</usg>—<i><i>An ancestor, forefather</i></i>:
+    <foreign lang="la">paternus</foreign>, <usg opt="n">H.</usg>:
+    <foreign lang="la">avi atavique</foreign>, <usg opt="n">V.</usg>
+  </sense>
+</div2>
+"""
 import re
 from glob import glob
 

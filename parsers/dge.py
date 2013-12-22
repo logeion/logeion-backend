@@ -1,4 +1,46 @@
 # -*- coding: utf-8 -*-
+"""
+Sample entry:
+
+<article class="entry" id="ἀάατος">
+    <nav class="prevnext">
+        <a class="prev" href="ἀά">&lt; ἀά</a>
+        <a class="next" href="Ἀάβ">Ἀάβ &gt;</a>
+    </nav>
+    <header class="form">
+        <strong class="lemma2 grc">ἀάατος</strong>
+        , <span class="gram">-ον</span>
+        <div class="form"><div class="prosodia"><label>Prosodia</label>:
+        [ᾰᾱᾰ-, pero ᾰᾱᾱ- <em>Il</em>.14.271] </div></div>
+    </header>
+  <section class="sense " id="">
+    <dfn>que no puede ser inducido a error<i> o </i>engañado</dfn>,
+    <dfn>infalible</dfn>
+      <span class="cit" id="ἀάατος_cit1">
+          <q class="grc">μοι ὄμοσσον ἀάατον Στυγὸς ὕδωρ</q>
+      </span> <em>Il</em>.14.271, 
+      <span class="cit" id="ἀάατος_cit2">
+          <q class="grc">μνηστήρεσσιν ἄεθλον ἀάατον</q>
+      </span> <em>Od</em>.22.5, cf. 21.91
+      <section class="sense " id="">
+        <b class="num">•</b> <dfn>imbatible</dfn>
+        <span class="cit" id="ἀάατος_cit3">
+          <q class="grc">νοήσας πυγμαχίην, ᾗ κάρτος ἀάατος</q>
+          <em class="tr"> habiendo observado su forma de pelear,
+              dónde su fuerza era imbatible</em>
+        </span> A.R.2.77, cf.
+        <em>AB</em> 321.1. 
+      </section>
+  </section>
+  <footer>
+    <div class="etym">
+      <label>Etimología</label>: Comp. neg. sobre la r. de 
+      <a>ἀάω</a> q.u.
+    </div>
+  </footer>
+</article>
+"""
+
 from __future__ import with_statement
 from BeautifulSoup import BeautifulStoneSoup
 from glob import glob

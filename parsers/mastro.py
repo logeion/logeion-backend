@@ -1,3 +1,11 @@
+"""
+Sample entries:
+
+ἀγαθός	7	ἀγαθός, good, well-born, brave
+ἄγαν	33	ἄγαν, very much; too much
+ἀγγέλλω	19	ἀγγέλλω, bear a message, announce, report
+ἄγγελος	3	ἄγγελος, messenger, herald
+"""
 import re
 from glob import glob
 

@@ -1,4 +1,6 @@
 *.py[cod]
+*.db
+*.db.*
 *.sqlite
 *.log
 *.old

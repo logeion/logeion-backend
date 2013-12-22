@@ -1,3 +1,12 @@
+"""
+Sample entries:
+
+ἀγαθός	4	ἀγαθός, ἀγαθή, ἀγαθόν, good
+ἀγγέλλω	10	ἀγγέλλω, ἀγγελῶ, ἤγγειλα, ἤγγελκα, ἤγγελμαι, ἠγγέλθην, announce
+ἄγγελος	2	ἄγγελος, ἀγγέλου, ὁ, messenger
+ἀγορά	1	ἀγορά, ἀγορᾶς, ἡ, marketplace
+"""
+
 import re
 from glob import glob
 

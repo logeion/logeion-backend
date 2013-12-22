@@ -1,3 +1,21 @@
+"""
+Sample entry:
+
+<div1 id="crossa^ba^cu^lus" orig_id="n10" key="a^ba^cu^lus" opt="n">
+  <head extent="full" lang="la" opt="n" orth_orig="ăbăcŭlus">abaculus</head>,
+  <itype opt="n">i</itype>, <gen opt="n">m.</gen> <lbl opt="n">dim.</lbl>
+  <etym opt="n">abacus</etym>, 
+  <sense id="n10.0" n="I" level="1" opt="n">
+    <i>a small cube or tile of colored glass for making ornamental pavements</i>,
+    the Gr. <foreign lang="greek">ὺβυκίσκος</foreign>,
+    <bibl n="Perseus:abo:phi,0978,001:36:199" default="NO" valid="yes">
+      <author>Plin.</author> 36, 26, 67, § 199
+    </bibl>.
+    <cb n="ABAL" />
+  </sense>
+</div1>
+"""
+
 from __future__ import with_statement
 from glob import glob
 import re

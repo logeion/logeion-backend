@@ -129,6 +129,8 @@ def did_end_element(name):
         sm.content +="</i>" 
     elif name == "bibl":
         sm.content +="</b>"
+    elif name == "head":
+        sm.content += " "
 
 def did_find_char_data(data):
     sm.content += data
@@ -171,7 +173,7 @@ def clean_xml_and_convert(dico_parsed):
     for i in range(len(dico_parsed)):
         content = dico_parsed[i]['content']
         content = unescape(content)
-        logging.info('Cleaning/converting entry ' + dico_parsed[i]['head'])
+        logging.debug('Cleaning/converting entry ' + dico_parsed[i]['head'])
         logging.debug('Entry ' + dico_parsed[i]['head'] + ' has data:\n' + content)
         if content is None:
             logging.warning('content is None for entry ' + dico_parsed[i]['head'])

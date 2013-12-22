@@ -1,4 +1,22 @@
 # -*- coding: utf-8 -*-
+"""
+Sample entry:
+
+<entry rend="carpentier" xml:id="AAISIENTIA">
+  <dictScrap xml:id="AAISIENTIA-1"><form rend="b">AAISIENTIA</form>, Facultas utendi ex concessione rebus non suis, idem quod <ref target="AASANTIA">Aasantia</ref> et <ref target="AISANTIA">Aisantia</ref>. Charta ann. 1269. in Chartul.
+    S. Joan. Laudun : <quote xml:lang="lat">Concedens eidem ecclesiæ.... omnimodas Aaisientias, quales,
+      antiquitus in omni territorio et advocatia mea antiqui hospites dictæ ecclesiæ in eadem
+      villa morantes habere solebant.</quote> Nostris olim <hi rend="i">Aaissier</hi>, idem quod Juvare,
+    auxiliari, Gall. <foreign xml:lang="fro">Aider, donner du secours</foreign>. Chron. S. Diom. tom. 3. Collect. Histor.
+    Franc. pag. 244 : <quote xml:lang="fro">Il tournerent à la maison d'un vilain pour demander à boire, et
+      il leur dist que il n'avoit de quoi eulz Aaissier. Aaisier</quote> præterea dixerunt pro
+    Ad tempus vel sub certis conditionibus aliquid commodare, concedere. Charta ann. 1271. in
+    Chartul. Pontiniac. pag. 75 : <quote xml:lang="fro">Je Guiz chevaliers Sires de Chanlost fais asavoir...
+      que li Abbés et li convenz de Pontigny.... m'ont presté et Aaisié leur maison de Sevyes,
+      tant comme il plaira à eux. <note>(Vide infra
+  <hi rend="i">Aisamenta</hi>.)</note></quote></dictScrap>
+</entry>
+"""
 from __future__ import with_statement
 from BeautifulSoup import BeautifulStoneSoup
 from glob import glob

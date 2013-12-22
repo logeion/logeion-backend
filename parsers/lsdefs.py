@@ -1,3 +1,11 @@
+"""
+Sample entries:
+
+ab	from, away from, out of
+abactus	driven away, driven off
+abacus	 a table of precious material for the display of plate
+abalienatio	a transfer of property, sale, cession
+"""
 from glob import glob
 import re
 

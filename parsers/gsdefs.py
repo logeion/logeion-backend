@@ -1,3 +1,12 @@
+"""
+Sample entries:
+
+ἀάατος	not to be injured, inviolable
+ἀαγής	unbroken, not to be broken, hard, strong
+ἄαδα	unpleasant
+ἀάζω	breathe with the mouth wide open
+"""
+
 import re
 from glob import glob
 

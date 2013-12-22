@@ -1,4 +1,19 @@
 # -*- coding: utf-8 -*-
+"""
+Sample entry:
+
+<div1 type="entry" org="uniform" sample="complete">
+  <head type="xref">
+    <placeName>
+      <settlement>AYIA TRIAS</settlement>,
+      see <ref type="cross" target="limes-greek-epeiros" targOrder="U">
+        LIMES, GREEK EPEIROS</ref>
+    </placeName>
+  </head>
+  <p/>
+</div1>
+"""
+
 import re, unicodedata as ud
 from glob import glob
 

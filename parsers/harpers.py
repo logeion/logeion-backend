@@ -1,4 +1,18 @@
 # -*- coding: utf-8 -*-
+"""
+Sample entry:
+
+<div2 id="crossabaculus" type="entry" org="uniform" sample="complete">
+  <head orig="Abacŭlus">Abaculus</head>
+  <p> (Gr. <foreign lang="greek">ἀβακίσκος</foreign>), 
+      diminutive of <ref type="cross" target="crossabacus">abacus</ref>
+      (q. v.), and denoting a tile of marble, glass, etc.,
+      used in making ornamental pavements. See
+      <ref type="cross" target="crossmusivum-opus">Musivum Opus</ref>.
+  </p>
+</div2>
+"""
+
 import re, unicodedata as ud
 from glob import glob
 

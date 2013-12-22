@@ -1,4 +1,18 @@
 # -*- coding: utf-8 -*-
+"""
+Sample entry:
+
+<div2 id="cross*)agaqwni/das" orig_id="n15" key="*)agaqwni/das" opt="n">
+  <head extent="full" lang="greek" opt="n" orth_orig="^αγᾰθωνίδας">Ἀγαθωνίδας</head>
+  a favourite of Pindar, Wil., Kl. Sch. 4. 181.
+  <quote lang="greek">ὄφρα σὺν Χειμάρῳ</quote>
+  <quote lang="greek">μεθύων Ἀγαθωνίδᾳ βάλω κότταβον</quote> (Wil.:
+  <quote lang="greek">Ἀγάθωνι δὲ</quote> codd.: i. e.
+  <sense id="n15.0" n="1" level="1" opt="n">
+    <gloss>in honour of Agathonidas</gloss>) fr. 128. 2.
+  </sense>
+</div2>
+"""
 import re
 from glob import glob
 

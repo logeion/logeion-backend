@@ -1,4 +1,15 @@
 # -*- coding: utf-8 -*-
+"""
+Sample entry:
+
+      <div2 id="crossa)a/atos" orig_id="main" key="a)a/atos" opt="n">
+        <head extent="full" lang="greek" opt="n" orig="ἀ-άᾱτος">ἀάατος</head>
+        (<quote lang="greek">ἀϝάω</quote>): of doubtful meaning. —(1) 
+        <gloss>inviolable</gloss>(if <quote lang="greek">α</quote>privative), 
+        ...
+      </div2>
+"""
+
 import re#, unicodedata
 from glob import glob
 

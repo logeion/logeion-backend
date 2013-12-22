@@ -1,4 +1,34 @@
 # -*- coding: utf-8 -*-
+"""
+Sample entry:
+
+<term date="8/17/2006" editinglevel="3" editor="Sara Koerber" 
+      id="id2379614" lemma="abdo" rev="9" time="10:56:43">
+<defs>
+  <en>to hide, conceal</en>
+</defs>
+<exs>
+  <ex>
+    <english>he hid himself within Apulia</english>
+    <latin>penitus in Apuliam se abdidit</latin>
+  </ex>
+</exs>
+<locked>no</locked>
+<pos>
+  <class>verb</class>
+  <extra>-dere, -didi, -ditum</extra>
+  <poetic>no</poetic>
+  <type>3rd (-ere)</type>
+</pos>
+<revcomment>This is a test.</revcomment>
+<uncertain>yes</uncertain>
+<xrefs>
+  <LTRL/>
+  <Wheelock/>
+</xrefs>
+</term>
+"""
+
 import re, unicodedata as ud
 from glob import glob
 

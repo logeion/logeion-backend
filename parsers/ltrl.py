@@ -1,4 +1,21 @@
 # -*- coding: utf-8 -*-
+"""
+Sample entries:
+
+<item id="_2">
+ <cat>1</cat>
+ <Q>ager</Q>
+ <A>agrī, m.
+field</A>
+</item>
+<item id="_2.tr.1">
+ <cat>1</cat>
+ <Q>field</Q>
+ <A>ager
+agrī, m.</A>
+</item>
+"""
+
 import re, unicodedata as ud
 from glob import glob
 

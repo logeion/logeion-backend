@@ -1,3 +1,13 @@
+"""
+Sample entries:
+
+amo,  amare,  amavi,  amatum	to love,  like	1
+amabo te	please	1
+cogito,  cogitare,  cogitavi,  cogitatum	to think,  ponder,  consider,  plan	1
+debeo,  debere,  debui,  debitum	to owe;  ought,  must,  should	1
+do,  dare,  dedi,  datum	to give,  offer	1
+"""
+
 import re
 from glob import glob
 

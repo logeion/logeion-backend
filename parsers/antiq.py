@@ -1,5 +1,15 @@
 # -*- coding: utf-8 -*-
 # For dvlg-final db or other two-column sqlite db
+"""
+Sample entry:
+
+<div2 type="entry" id="authepsa-cn" org="uniform" sample="complete">
+  <head orig="AUTHEPSA">AUTHEPSA</head>
+  <p><label>AUTHEPSA</label>(<label lang="greek">αὐθέψης</label>), or <quote>self-boiler,</quote>was...</p>
+  <p>Nazionale (formerly Borbonico) at Naples. It is probable...</p>
+  <byline>[<ref type="cross" target="author.W.S" targOrder="U">W.S</ref>] [<ref type="cross" target="author.W.W" targOrder="U">W.W</ref>]</byline>
+</div2>
+"""
 
 import re
 from glob import glob

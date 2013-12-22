@@ -1,4 +1,20 @@
 # -*- coding: utf-8 -*-
+"""
+Sample entry:
+
+<LENTRY nummer="2756" id="avocamentum">
+  <METALEX>
+    <LCANON volg=""><ITEM>avocamentum</ITEM></LCANON>
+    <LCAT><ITEM>sub</ITEM></LCAT>
+    <CORP><ITEM>postklass.</ITEM></CORP>
+  </METALEX>
+  <VET>&amacron;voc&amacron;mentum, </VET>
+  <NORMAAL taal="JJ">&imacron; </NORMAAL>
+  <CURSIEF taal="JJ">n (avoco) (postklass.) </CURSIEF>
+  <NORMAAL taal="NL">verstrooiing, afleiding.</NORMAAL>
+</LENTRY>
+"""
+
 import re, htmlentitydefs as hed
 from glob import glob
 

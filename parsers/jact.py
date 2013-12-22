@@ -1,3 +1,11 @@
+"""
+Sample entries:
+
+ἀγαθός	2b	ἀγαθός ή όν, good, noble, courageous (adjective)
+ἄγαλμα	18d	ἄγαλμα, τό, image, statue (noun)
+ἀγγέλλω	19f	ἀγγέλλω, report, announce (verb)
+ἄγγελος	17c	ἄγγελος, ὁ, messenger (noun)
+"""
 import re
 from glob import glob
 
