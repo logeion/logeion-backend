@@ -394,7 +394,7 @@ for dico in dicos:
         sys.stdout.write('\t%s:%sloading\r' % (dico, spcs))
         sys.stdout.flush()
         if dico not in ('GreekShortDefs', 'LatinShortDefs',
-                        'BWL', 'DuCange', 'DGE') \
+                        'BWL', 'DuCange', 'DGE', 'hrvmatlat') \
         and dico not in sidebar_dicos:
             dico_parsed = clean_xml_and_convert(dico_parsed)
         loaded_successfully = dico_loader(dico, dico_parsed)
