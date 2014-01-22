@@ -12,17 +12,33 @@ Process for updating Logeion
 **NB:** If you're running any of the Logeion generating scripts, run them in the top-level
 Logeion dir (i.e. /Users/Shared/Logeion_parsers on grade)
 
-1.  **If you are not parsing GreekShortDefs or LatinShortDefs, you may skip this step.**  
+1.  **If you are not parsing the shortdefs or Greek textbooks, you may skip this step.**  
     To grab Latin and Greek shortdefs, first run:  
         `$ scripts/update_shortdefs.py <lemmastoknow db> <lexicon db>`  
-    This will update the lemmastoknow file with modified entries from the lexicon. Then,  
+    This will update the lemmastoknow file with modified entries from the lexicon. Then, run  
 
         $ scripts/grab_lemmastoknow.py <dico> ...
           dico: [HQ | JACT | LTRG | Mastro | shortdefs | all]  
 
     The appropriately-named files should be in the current directory; put them in the right
-    spots in the dictionaries directory. Make sure that `lemmastoknow.sqlite` is in your
-    current directory.
+    spots in the dictionaries directory, making sure that the name matches what the parser
+    for that dictionary accepts (currently, filename should be the same one that `grab_lemmastoknow.py`
+    spits out). Make sure that `lemmastoknow.sqlite` is in your current directory. For example,  
+    if you need to reparse Hansen & Quinn, LTRG, and the Greek shortdefs, then do the following
+    (assuming the lemmastoknow file is in your current directory):  
+    
+        $ scripts/update_shortdefs.py <lemmastoknow> <lexicon>
+        $ scripts/grab_lemmastoknow.py HQ LTRG shortdefs
+        $ ls
+          ...
+          hq.dat
+          ltrg.dat
+          shortdefs.dat
+          ...
+        $ mv hq.dat path/to/HQ/
+        $ mv ltrg.dat path/to/LTRG/
+        $ mv shortdefs.dat path/to/GreekShortDefs/
+    
 2.  Then run:  
         `$ ./logeion_parse.py <name of dictionary> ([ --latin | --greek | --sidebar ])* ...`  
     to regenerate each dictionary. For example, if you want to parse GreekShortDefs, LatinShortDefs,
