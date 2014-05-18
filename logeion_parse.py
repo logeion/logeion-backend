@@ -29,6 +29,7 @@ Usage: %s [options] [dico ...]
     --latin         Parse Latin dictionaries and references (cumulative).
     --greek         Parse Greek dictionaries (cumulative).
     --sidebar       Parse textbooks (cumulative).
+    --not <dico>    Ignore <dico> when parsing (remove from set to be parsed).
     --db <db>       Use <db> as output database instead of './new_dvlg-wheel.sqlite'.
     --level <level> Log at level <level>; default is INFO. Case-insensitive.
                     Options: %s""" \
@@ -152,7 +153,7 @@ def clean_one_entry(data):
         xml_parser.Parse(data)
     except xml.parsers.expat.ExpatError, e:
         print >> sys.stderr, '\n' + str(e)
-        print >> sys.stderr, data
+        print >> sys.stderr, data.encode('utf-8')
         m = re.search('column ([0-9]+)', str(e))
         if m:
             print >> sys.stderr, '...'+data[int(m.group(1)):]
@@ -324,6 +325,14 @@ while i < len(args):
         dicos.update([(k,all_dicos[k]) for k in greek_dicos])
     elif args[i] == '--sidebar': # parse textbooks
         dicos.update([(k,all_dicos[k]) for k in sidebar_dicos])
+    elif args[i] == '--not': # ignore the following dico
+        notdb = args[i+1]
+        if notdb not in dicos:
+            print >> sys.stderr, '%s: warning: dico %s already not included in parsing set' \
+              % (prog, notdb)
+        else:
+            del dicos[notdb]
+        i += 1
     else: # all other args
         if args[i] in all_dicos:
             dicos[args[i]] = all_dicos[args[i]]
