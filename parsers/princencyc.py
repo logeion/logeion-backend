@@ -159,6 +159,7 @@ def parse(dico_path):
     for xmlfile in dico_data:        
         content = ''
         for line in open(xmlfile):           
+            line = line.decode('utf-8')
             if find_head.search(line) and begin and not head_found:                
                 head_match = find_head.search(line)
                 head_found = True

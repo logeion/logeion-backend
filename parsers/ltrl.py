@@ -24,35 +24,39 @@ type = 'sidebar'
 caps = 'precapped'
 
 # regex patterns   
-clean_content = re.compile('<Q>|</Q>')
-clean_head = re.compile('<A>|</A>')
-find_chpt = re.compile('<cat>.+</cat>')
-clean_chpt = re.compile('<cat>|</cat>')
+clean_content = re.compile(u'<Q>|</Q>')
+clean_head = re.compile(u'<A>|</A>')
+find_chpt = re.compile(u'<cat>.+</cat>')
+clean_chpt = re.compile(u'<cat>|</cat>')
 
 # Assigns the correct chapter number to the entries with chapter 0
-chapter_zero = {'2': ['A.', 'Aeneas', 'Apollo', 'App.', 'C.', 'Catilina', 'Catullus', 'Cn.',
-                       'D.', 'Ilium', 'L.', 'L. Sergius Catilina', 'Livia', 'M.', "M’", 'P.',
-                       'Q.', 'Ser.', 'Sex.', 'Sp.', 'T.', 'Ti.', 'Troia'],
-                '6': ['Caesar', 'Cato', 'Ceres', 'Cicero', 'Cupido', 'Dido', 'Dis', 'divinus',
-                       'divus', 'Hannibal', 'Iuno', 'Iuppiter', 'Latinus', 'Mars', 
-                       'P. Vergilius Maro', 'Venus'],
-                '7': ['herc(u)le', 'mehercule', 'mehercules', 'salus', 'salutem dicere', 'salve',
-                       'salvete', 'vale', 'valete', 'valeo', 'ecce', 'heu', 'valde'],
-               '10': ['centesimus', 'centum', 'decimus', 'duo', 'mille', 'milia', 'millesimus',
-                       'nonus', 'novem', 'octavus', 'octo', 'primus', 'quartus', 'quattuor',
-                       'quinque', 'quintus', 'secundus', 'septem', 'septimus', 'sex', 'sextus', 
-                       'tertius', 'tres', 'tria'],
-               '13': ['eo', 'hic', 'hinc', 'hinc… hinc/illinc…', 'huc', 'ibi', 'illic', 'illinc', 
-                       'illuc', 'inde']}
-                
-tosplit = ['is ea id', 'hic haec hoc', 'qui quae quod', 'quis quid', 'maior maius',
-         'melior melius', 'minor minus', 'peior peius', 'prior prius', 'tres tria']
+chapter_zero = \
+    {'2': ['A.', 'Aeneas', 'Apollo', 'App.', 'C.', 'Catilina', 'Catullus', 'Cn.',
+	       'D.', 'Ilium', 'L.', 'L. Sergius Catilina', 'Livia', 'M.', 'M’', 'P.',
+	       'Q.', 'Ser.', 'Sex.', 'Sp.', 'T.', 'Ti.', 'Troia'],
+	'6': ['Caesar', 'Cato', 'Ceres', 'Cicero', 'Cupido', 'Dido', 'Dis', 'divinus',
+	       'divus', 'Hannibal', 'Iuno', 'Iuppiter', 'Latinus', 'Mars', 
+	       'P. Vergilius Maro', 'Venus'],
+	'7': ['herc(u)le', 'mehercule', 'mehercules', 'salus', 'salutem dicere', 'salve',
+	       'salvete', 'vale', 'valete', 'valeo', 'ecce', 'heu', 'valde'],
+       '10': ['centesimus', 'centum', 'decimus', 'duo', 'mille', 'milia', 'millesimus',
+	       'nonus', 'novem', 'octavus', 'octo', 'primus', 'quartus', 'quattuor',
+	       'quinque', 'quintus', 'secundus', 'septem', 'septimus', 'sex', 'sextus', 
+	       'tertius', 'tres', 'tria'],
+       '13': ['eo', 'hic', 'hinc', 'hinc… hinc/illinc…', 'huc', 'ibi', 'illic', 'illinc', 
+	       'illuc', 'inde']}
 
-tonotsplit = ['hinc/', 'gratiam/', 'plus/', 'sed/', 'neque/', 'quam ob', 'patres ',
-              'poenas ', 'vela ', 'bellum ', 'causam ', 'consilium ', 'se ferre',
-              'res ', 'legem ', 'opus ', 'orationem ', 'castra ', 'se eicere',
-              'male velle', 'se conferre', 'orbis ', 'salutem ', 'quo modo',
-              'prima ', 'bene velle', 'gratias ', 'quam primum', '.', '…', ';']
+for key in chapter_zero:
+    chapter_zero[key] = [l.decode('utf-8') for l in chapter_zero[key]]
+
+tosplit = [u'is ea id', u'hic haec hoc', u'qui quae quod', u'quis quid', u'maior maius',
+         u'melior melius', u'minor minus', u'peior peius', u'prior prius', u'tres tria']
+
+tonotsplit = [u'hinc/', u'gratiam/', u'plus/', u'sed/', u'neque/', u'quam ob', u'patres ',
+              u'poenas ', u'vela ', u'bellum ', u'causam ', u'consilium ', u'se ferre',
+              u'res ', u'legem ', u'opus ', u'orationem ', u'castra ', u'se eicere',
+              u'male velle', u'se conferre', u'orbis ', u'salutem ', u'quo modo',
+              u'prima ', u'bene velle', u'gratias ', u'quam primum', u'.', u'…', u';']
                
 # Cheap functions, but more accurate than simply "newhead in tosplit", etc.
 def dosplit(head):
@@ -69,13 +73,13 @@ def dontsplit(head):
 # headwords into separate entries where appropriates
 def clean_headword(line, content):
     head = clean_head.sub('', line).strip()
-    content = '%s, %s' % (head, content)
-    head = re.sub(' -a -um', '', head)    
-    head = re.sub('^(-)|_|—', '', head).lstrip()
-    head = re.sub(' \([^)]+\)$', '', head)
+    content = u'%s, %s' % (head, content)
+    head = re.sub(u' -a -um', '', head)    
+    head = re.sub(u'^(-)|_|—', '', head).lstrip()
+    head = re.sub(u' \([^)]+\)$', '', head)
  
     newhead = ''
-    for char in unicode(head):
+    for char in head:
         charname = ud.name(char)
         if 'LATIN' in charname:
             newcharname = re.search('LATIN (CAPITAL|SMALL) LETTER [\w]+', charname).group(0)
@@ -83,6 +87,8 @@ def clean_headword(line, content):
             newcharname = charname
         newhead += ud.lookup(newcharname)
         
+    assert isinstance(newhead, unicode)
+    #newhead = newhead.decode('utf-8')
     if ' ' in newhead.strip() and dosplit(newhead):
         newhead = newhead.split(' ')
     elif ' ' in newhead.strip() and dontsplit(newhead) and not dosplit(newhead):
@@ -99,9 +105,10 @@ def check_chapter(head, chapter):
     if chapter != '0':
         return chapter
     else:
+        assert isinstance(head, unicode)
         for key in chapter_zero:
             if head in chapter_zero[key]: return key
-        raise Exception('lemma not in chapter_zero')
+        raise Exception('lemma not in chapter_zero: '+head.encode('utf-8'))
 
 # Main method
 def parse(dico_path):
@@ -112,6 +119,7 @@ def parse(dico_path):
     begin = False
     for xmlfile in dico_data:
         for line in open(xmlfile):
+            line = line.decode('utf-8')
             if re.search('id=".+?\.tr', line):
                 id = re.sub('id="|"', '', re.search('id=".+?\.tr', line).group(0))
                 begin = True
@@ -128,6 +136,7 @@ def parse(dico_path):
                     if id not in  ('_167.tr',):
                         if isinstance(head, list):
                             for each in head:
+                                assert isinstance(each, unicode)
                                 each = each.strip()
                                 chapter = check_chapter(each, chapter)
                                 attrs = {'head': each, 'content': content, 'chapter': chapter}

@@ -29,8 +29,10 @@ Usage: %s [options] [dico ...]
     --latin         Parse Latin dictionaries and references (cumulative).
     --greek         Parse Greek dictionaries (cumulative).
     --sidebar       Parse textbooks (cumulative).
-    --not <dico>    Ignore <dico> when parsing (remove from set to be parsed).
+    --not <dicos>[,<dico>]*
+                    Ignore given dicos when parsing (i.e. remove from set to be parsed).
     --db <db>       Use <db> as output database instead of './new_dvlg-wheel.sqlite'.
+    --help          Display this message and exit
     --level <level> Log at level <level>; default is INFO. Case-insensitive.
                     Options: %s""" \
                     % (prog, str([f for f in dir(logging) 
@@ -143,6 +145,8 @@ def did_find_char_data(data):
 #xml_parser.CharacterDataHandler = did_find_char_data
 
 def clean_one_entry(data):
+    #assert isinstance(data, unicode)
+    data = data.encode('utf-8')
     global sm
     sm = StateManager()
     try:
@@ -153,7 +157,7 @@ def clean_one_entry(data):
         xml_parser.Parse(data)
     except xml.parsers.expat.ExpatError, e:
         print >> sys.stderr, '\n' + str(e)
-        print >> sys.stderr, data.encode('utf-8')
+        print >> sys.stderr, data
         m = re.search('column ([0-9]+)', str(e))
         if m:
             print >> sys.stderr, '...'+data[int(m.group(1)):]
@@ -174,8 +178,9 @@ def clean_xml_and_convert(dico_parsed):
     for i in range(len(dico_parsed)):
         content = dico_parsed[i]['content']
         content = unescape(content)
+        #assert type(content) == unicode
         logging.debug('Cleaning/converting entry ' + dico_parsed[i]['head'])
-        logging.debug('Entry ' + dico_parsed[i]['head'] + ' has data:\n' + content)
+        logging.debug('Entry ' + dico_parsed[i]['head'] + ' has data:\n' + content.encode('utf-8'))
         if content is None:
             logging.warning('content is None for entry ' + dico_parsed[i]['head'])
         else:
@@ -305,10 +310,14 @@ dicos = {}
 flag2dicos = {'--greek': greek_dicos,     '--latin': latin_dicos,
               '--sidebar': sidebar_dicos, '--all': all_dicos.keys()}
 dbname = 'new_dvlg-wheel.sqlite'
+notdbs = None
 loglevel = logging.INFO
 i = 0
 while i < len(args):
-    if args[i] == '--level': # set log level
+    if args[i] == '--help':
+        print >> sys.stderr, usage
+        sys.exit(0)
+    elif args[i] == '--level': # set log level
         levelname = logging.getLevelName(args[i+1].upper())
         loglevel = levelname if type(levelname) is int else loglevel
         i += 1
@@ -326,12 +335,7 @@ while i < len(args):
     elif args[i] == '--sidebar': # parse textbooks
         dicos.update([(k,all_dicos[k]) for k in sidebar_dicos])
     elif args[i] == '--not': # ignore the following dico
-        notdb = args[i+1]
-        if notdb not in dicos:
-            print >> sys.stderr, '%s: warning: dico %s already not included in parsing set' \
-              % (prog, notdb)
-        else:
-            del dicos[notdb]
+        notdbs = args[i+1].split(',')
         i += 1
     else: # all other args
         if args[i] in all_dicos:
@@ -342,6 +346,9 @@ while i < len(args):
             sys.exit(1)
     i += 1
 
+if notdbs:
+    for ndb in notdbs:
+        if ndb in dicos: del dicos[ndb]
 conn = sqlite3.connect(dbname)
 conn.text_factory = str
 c = conn.cursor()
@@ -395,6 +402,15 @@ for dico in dicos:
         sys.stdout.flush()
     else: 
     	# Logs errors, etc. from parsing dico
+
+        # This little bit comes from the mix of unicode and str types that
+        # are typical of Python 2.x; rather than expect one type from the
+        # parsers, we just convert everything to UTF-8-encoded strings here
+        logging.debug('Converting everything to UTF-8 string from unicode')
+        for i in range(len(dico_parsed)):
+            for k in dico_parsed[i]:
+                if isinstance(dico_parsed[i][k], unicode):
+                    dico_parsed[i][k] = dico_parsed[i][k].encode('utf-8')
         for level in tobelogged:
             for event in tobelogged[level]:
                 getattr(logging, level)(event)

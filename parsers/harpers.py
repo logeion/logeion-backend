@@ -42,7 +42,7 @@ def dosplit(head):
 def clean_headword(headword, content):
     headword = clean_head.sub('', headword).lower()
     newhead = u''
-    for char in unicode(headword):
+    for char in headword:
         charname = ud.name(char)
         if 'LATIN' in charname:
             newcharname = re.search('LATIN SMALL LETTER [\w]+', charname).group(0)
@@ -86,6 +86,7 @@ def parse(dico_path):
         content = ''
         head_found = False        
         for line in open(xmlfile):
+            line = line.decode('utf-8')
             if find_head.search(line) and begin and not head_found:
                 head_match = re.search(find_head, line)
                 head_found = True

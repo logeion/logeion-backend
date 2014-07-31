@@ -56,24 +56,27 @@ def parse(dico_path):
             # passed, then parser stops short
             soup = BeautifulStoneSoup(infh, selfClosingTags=['pb','cb'])
             for entry in soup.findAll('entry'):
-                head = entry['xml:id']
+                head = entry['xml:id'].encode('utf-8')
 
                 # Usually, the xml:id attr is more accurate, but it doesn't
                 # distinguish between a dash and whitespace, so we take form
                 if '-' in head:
                     try:
-                        head = entry.find('form', rend='b').text
+                        head = entry.find('form', rend='b').text.encode('utf-8')
                     except(AttributeError):                    
                         pass
                     
                 try:
                     head = cleanup_head(head)
                     attrs = {'head': head.strip(),
-                             'content': str(entry).decode('utf-')}
+                             'content': str(entry)}# Calling str() on a
+                                                   # BeautifulSoup.Tag object
+                                                   # encodes it in UTF-8 by
+                                                   # default, so we're fine
                     dico.append(attrs)
                 except(Exception), e:
                     tobelogged['warning'].append("%s couldn't parse line \"%s\"...: %s" \
-                    % (xmlfile.split('/')[-1], content[:50], e))
+                        % (xmlfile.split('/')[-1], str(entry)[:50], e))
                     
         tobelogged['info'].append('%s finished parsing' % xmlfile.split('/')[-1])
         

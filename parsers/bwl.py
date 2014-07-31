@@ -49,7 +49,7 @@ diacr = {u'ā': u'a', u'ē': u'e', u'ë': u'e', u'ī': u'i', u'ō': u'o', u'ū':
 
 # Deletes macrons and other diacritical marks
 def clean_diacr(head):
-    head = unicode(head)
+    #head = unicode(head)
     newhead = ''
     for char in head:
         try:
@@ -76,6 +76,7 @@ def parse(dico_path):
     content = ''
     for xmlfile in dico_data:
         for line in open(xmlfile):
+            line = line.decode('utf-8')
             if head_flag.search(line): # Finds line denoting beginning of entry
                 head = find_head.search(line).group(0)
                 head = clean_head.sub('', head)

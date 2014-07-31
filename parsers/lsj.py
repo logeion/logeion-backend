@@ -53,6 +53,7 @@ def parse(dico_path):
         content = ''
         split_flag = False
         for line in open(xmlfile):
+            line = line.decode('utf-8')
             if not (find_entry.search(line) or find_pb.search(line) or split_flag):
                 continue
             content += line
