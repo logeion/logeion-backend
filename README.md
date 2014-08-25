@@ -9,8 +9,8 @@ add your own dictionaries/try out Logeion for yourself; instructions for doing s
 Process for updating Logeion
 ----------------------------
 
-**NB:** If you're running any of the Logeion generating scripts, run them in the top-level
-Logeion dir (i.e. /Users/Shared/Logeion_parsers on grade)
+**NB:** If you're running any of the Logeion db-building scripts, run them in the top-level
+Logeion directory (i.e. /Users/Shared/Logeion_parsers on stephanus).
 
 1.  **If you are not parsing the shortdefs or Greek textbooks, you may skip this step.**  
     To grab Latin and Greek shortdefs, first run:  
@@ -29,12 +29,8 @@ Logeion dir (i.e. /Users/Shared/Logeion_parsers on grade)
     
         $ scripts/update_shortdefs.py <lemmastoknow> <lexicon>
         $ scripts/grab_lemmastoknow.py HQ LTRG shortdefs
-        $ ls
-          ...
-          hq.dat
-          ltrg.dat
-          shortdefs.dat
-          ...
+        $ ls *.dat
+          hq.dat    ltrg.dat    shortdefs.dat
         $ mv hq.dat path/to/HQ/
         $ mv ltrg.dat path/to/LTRG/
         $ mv shortdefs.dat path/to/GreekShortDefs/
@@ -55,24 +51,31 @@ Logeion dir (i.e. /Users/Shared/Logeion_parsers on grade)
     run:  
         `$ ./logeion_parse.py --latin --greek --db dvlg-wheel.sqlite`  
     Note that, since `new_dvlg-wheel.sqlite` is the default database name, running `logeion_parse.py` with
-    `new_dvlg-wheel.sqlite` in your current directory will overwrite whatever dictionaries your are parsing.
+    `new_dvlg-wheel.sqlite` in your current directory will overwrite whatever dictionaries you are parsing.
 
 
 Adding a new dictionary
 -----------------------
-*   A parser script must have:  
+
+Dictionaries consist of two objects: a folder containing the source files and a parser file containing a
+Python function and other data to parse the source files and provide necessary metadata, respectively.
+
+*   A parser file must have:  
     1.  a method called `parse` which returns a list of `dict`s of values. Each entry in the list should
         be formatted as such if the dictionary is not textbook:  
-            `{'head': lemma, 'orth_orig': lemma with proper diacritics, 'content': entire entry}`  
+            `{'head': <lemma>, 'orth_orig': <lemma w/diacritics>, 'content': <entire entry>}`  
         and as such if it is a textbook:  
-            `{'head': lemma, 'content': entire entry, 'chapter': chapter num}`;
-    2.  three global variables called `name`, `type`, and `caps`:  
-            + `name`: name of the dictionary (same as dictionary folder)  
-            + `type`: `(latin|greek|sidebar)`  
-            + `caps`: `(uncapped|source|precapped)`; `uncapped` means that capitalization needs to
-              be performed on it, `source` means that other `uncapped` dictionaries should
-              be compared to it, and `precapped` means that it shouldn't be touched during
-              capitalization.  
+            `{'head': <lemma>, 'content': <entire entry>, 'chapter': <chapter #>}`;
+    2.  three global variables called `name`, `type`, and `caps`:
+        *   `name`: name of the dictionary (same as dictionary folder)
+        *   `type`: `(latin|greek|sidebar)`
+        *   `caps`: `(uncapped|source|precapped)`; `uncapped` means that capitalization needs to
+            be performed on it, `source` means that it should serve as a source for capitalization info,
+            and `precapped` means that it shouldn't be touched during capitalization.
+        *   `convert_xml` (optional): `(True|False)`; determines whether the dictionary's content
+            should be converted/coerced to Logeion's XML format. If the dictionary content is plaintext
+            or you want its XML/HTML structure to be preserved, set it to `False` or don't include it
+            at all.
     With regard to capitalization: if the lemmas are in all-caps in the source texts, then normalize
     them to all-lowercase in the output (but keep them the same in the actual entry). `logeion_parse.py`
     runs a routine that attempts to guess proper capitalization based on other similar lemmas, and might
@@ -87,16 +90,19 @@ Adding a new dictionary
     It finds the xml files based on the `name` property in the parser file.
 *   Put all the dictionary files to be parsed in `Logeion_parsers/dictionaries`, in a folder
     named the same as the dictionary. (E.g. `NewDico.xml` should be in `Logeion_parsers/dictionaries/NewDico`.)
+*   **(important)** Additionally, the new dictionary needs to be added to the appropriate `dOrder_<language>`
+    list at the beginning of the `headword.py` script. **If the dictionary is not added to this list it will
+    not show up in search results.**
    
 
 More on cleaning up dictionaries
 -------------------------
 *   It's been the practice to modify textbook entries by adding the unmodified lemma to
-    the beginning of the entry          content.  For example, `{'amatus, -a, -um': 'beloved'}`
+    the beginning of the entry content.  For example, `{'amatus, -a, -um':      'beloved'}`
     would be added to Logeion as `{'amatus': 'amatus, -a, -um,      beloved'}`, etc.
 *   If the lemma contains diacritics that you're getting rid of, add them to the content
     first.  So, `{'amātus, -a, -um': 'beloved'}` => `{'amatus': 'amātus, -a, -um, beloved'}`.
-*   XML entities are evil; excepting the core HTML entities (&(gt|lt|amp|apos|quot);), they should
+*   XML entities are evil; excepting the core HTML entities `&(gt|lt|amp|apos|quot);`, they should
     all be gone.
 
 
@@ -141,14 +147,14 @@ follow these steps. (Sample databases are located
         `$ ./logeion_parse.py <name of dictionary> --db dvlg-wheel-mini.sqlite`  
     (assuming `dvlg-wheel-mini.sqlite` is in your current directory).  
     If your dictionary is in CSV format or you want to preserve its current (X|HT)ML structure, then
-    you will want to add its name (i.e. the value of the `name` property in the parser) to the tuple
-    in lines 394-5 of `logeion_parse.py`. *(Very hacky; will be updated ASAP.)*
+    ensure that the `convert_xml` property is present in the parser file and set to `True`.
 2.  Once you have a database appropriately structured (either from step 1 or from the SourceForge links
     above), checkout the CGI and HTML repos (`logeion-cgi` and `logeion-html`, respectively). The files
-    on the `master` branch require the two directories `cgi-bin` and `html` to be siblings, though feel
+    on the `master` branch are configured with the two directories `cgi-bin` and `html` as siblings, though feel
     free to change this as needed.
 3.  Add all relevant databases to the CGI directory. Logeion requires `greekInfo.db`, `latinInfo.db`, and
     `dvlg-wheel.sqlite`. For the last, you may also rename `dvlg-wheel-mini.sqlite` or edit
     the CGI scripts so that they point to the correct file.
-4.  After configuring your server appropriately, you should be good to go! Direct any questions/issues to
-    Helma Dik (helmadik@gmail.com) or Matt Shanahan (mrshanahan@uchicago.edu).
+4.  After configuring your server appropriately, you should be good to go! Direct any questions/issues regarding
+    dictionaries or Logeion in general to Helma Dik (helmadik@gmail.com) and any technical
+    questions about setup to Matt Shanahan (mrshanahan@uchicago.edu).
