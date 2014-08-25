@@ -17,6 +17,7 @@ from glob import glob
 name = 'Antiquities'
 type = 'latin'
 caps = 'uncapped'
+convert_xml = True
 
 # regex patterns
 find_head = re.compile('<label(.)*?>(.)*?</label>')

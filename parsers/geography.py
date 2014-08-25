@@ -19,6 +19,7 @@ from glob import glob
 name = 'Geography'
 type = 'latin'
 caps = 'precapped'
+convert_xml = True
 
 # regex patterns
 find_head = re.compile('<label( lang="la")?')

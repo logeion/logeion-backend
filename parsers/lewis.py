@@ -21,6 +21,7 @@ from glob import glob
 name = 'Lewis'
 type = 'latin'
 caps = 'source'
+convert_xml = True
 
 # regex patterns
 find_head = re.compile('<head.*?/head>', flags=re.S)

@@ -12,6 +12,7 @@ import re
 name = 'LatinShortDefs'
 type = 'latin'
 caps = 'source'
+convert_xml = False
 
 def parse(dico_path):
     #dico_data = sorted(glob(dico_path+'/LatinShortDefs*'))

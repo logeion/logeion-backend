@@ -24,6 +24,7 @@ import re
 name = 'LewisShort'
 type = 'latin'
 caps = 'source'
+convert_xml = True
 
 # regex patterns
 #is_meta = re.compile('[\s]*<[?][\s]*xml')

@@ -19,6 +19,7 @@ from glob import glob
 name = 'Harpers'
 type = 'latin'
 caps = 'uncapped'
+convert_xml = True
 
 # regex patterns    
 find_head = re.compile('<head(.)*?/head>')

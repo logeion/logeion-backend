@@ -16,9 +16,10 @@ Sample entry:
 import re
 from glob import glob
 
-name = 'Slater'
+name = 'SlaterPindar'
 type = 'greek'
 caps = 'precapped'
+convert_xml = True
 
 # regex patterns
 find_head = re.compile('<head(.)*?</head>')

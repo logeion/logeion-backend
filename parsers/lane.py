@@ -21,6 +21,7 @@ from glob import glob
 name = 'LaNe'
 type = 'latin'
 caps = 'precapped'
+convert_xml = True
 
 # regex patterns
 find_entries = re.compile('<LENTRY.*?</LENTRY>', re.S)

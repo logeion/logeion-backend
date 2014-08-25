@@ -49,6 +49,7 @@ import re
 name = 'DGE'
 type = 'greek'
 caps = 'precapped'
+convert_xml = False
 
 # regex patterns
 clean_head = re.compile(u'xml:id=|"|<[/]?[^<>]*>|[0-9]')

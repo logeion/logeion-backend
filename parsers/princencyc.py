@@ -20,6 +20,7 @@ from glob import glob
 name = 'PrincetonEncyclopedia'
 type = 'latin'
 caps = 'precapped'
+convert_xml = True
 
 # regex patterns    
 find_head = re.compile('<settlement>(.)*?</settlement>')

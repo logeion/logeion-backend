@@ -14,6 +14,7 @@ from glob import glob
 name = 'GreekShortDefs'
 type = 'greek'
 caps = 'precapped'
+convert_xml = False
 
 def parse(dico_path):
     xmlfile = dico_path+'/shortdefs.dat'

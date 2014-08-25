@@ -25,6 +25,7 @@ import re
 name = 'DuCange'
 type = 'latin'
 caps = 'uncapped'
+convert_xml = False
 
 # regex patterns
 find_head = re.compile('xml:id=".+?"')

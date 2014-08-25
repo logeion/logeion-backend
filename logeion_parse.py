@@ -13,6 +13,7 @@ import re
 import logging
 import unicodedata
 import htmlentitydefs
+import os.path
 
 try:
     from parsers import *
@@ -32,6 +33,9 @@ Usage: %s [options] [dico ...]
     --not <dicos>[,<dico>]*
                     Ignore given dicos when parsing (i.e. remove from set to be parsed).
     --db <db>       Use <db> as output database instead of './new_dvlg-wheel.sqlite'.
+    --dico-root <root>
+                    Folder containing the dictionary source folders; defaults to
+                    ./dictionaries
     --help          Display this message and exit
     --level <level> Log at level <level>; default is INFO. Case-insensitive.
                     Options: %s""" \
@@ -304,12 +308,15 @@ greek_dicos = [d.name for d in all_dicos.values() if d.type == 'greek']
 sidebar_dicos = [d.name for d in all_dicos.values() if d.type == 'sidebar']
 uncapped = [d.name for d in all_dicos.values() if d.caps == 'uncapped']
 source = [d.name for d in all_dicos.values() if d.caps == 'source']
+convert_xml = [d.name for d in all_dicos.values() \
+               if hasattr(d, 'convert_xml') and d.convert_xml]
 
 # Parse command-line arguments
 dicos = {}
 flag2dicos = {'--greek': greek_dicos,     '--latin': latin_dicos,
               '--sidebar': sidebar_dicos, '--all': all_dicos.keys()}
 dbname = 'new_dvlg-wheel.sqlite'
+dico_root = './dictionaries'
 notdbs = None
 loglevel = logging.INFO
 i = 0
@@ -323,6 +330,9 @@ while i < len(args):
         i += 1
     elif args[i] == '--db': # use provided db name
         dbname = args[i+1]
+        i += 1
+    elif args[i] == '--dico-root':
+        dico_root = args[i+1]
         i += 1
     elif args[i] == '--all': # parse all dicos
         dicos.update([(k,all_dicos[k]) for k in latin_dicos])
@@ -341,7 +351,8 @@ while i < len(args):
         if args[i] in all_dicos:
             dicos[args[i]] = all_dicos[args[i]]
         else:
-            print >> sys.stderr, '%s: error: dico/option %s not recognized' % (prog, args[i])
+            print >> sys.stderr, '%s: error: dico/option %s not recognized' \
+                % (prog, args[i])
             print >> sys.stderr, usage
             sys.exit(1)
     i += 1
@@ -394,7 +405,8 @@ for dico in dicos:
     sys.stdout.write('\t%s:%sparsing\r' % (dico, spcs)) 
     sys.stdout.flush()
     try:
-        dico_parsed, tobelogged = getattr(dicos[dico], 'parse')('dictionaries/'+dico)
+        #dico_parsed, tobelogged = getattr(dicos[dico], 'parse')('dictionaries/'+dico)
+        dico_parsed, tobelogged = getattr(dicos[dico], 'parse')(dico_root+'/'+dico)
         logging.info(dico + ' finished parsing; applying html cleanup and inserting into db')
     except(Exception), e: # Either error in calling the actual function itself or in documenting normal error
         logging.warning('While parsing %s: %s' % (dico, e))
@@ -418,9 +430,7 @@ for dico in dicos:
     	# Loads entries to SQLite table
         sys.stdout.write('\t%s:%sloading\r' % (dico, spcs))
         sys.stdout.flush()
-        if dico not in ('GreekShortDefs', 'LatinShortDefs',
-                        'BWL', 'DuCange', 'DGE', 'hrvmatlat') \
-        and dico not in sidebar_dicos:
+        if dico in convert_xml:
             dico_parsed = clean_xml_and_convert(dico_parsed)
         loaded_successfully = dico_loader(dico, dico_parsed)
         if tobelogged['warning']:

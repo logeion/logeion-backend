@@ -35,6 +35,7 @@ from glob import glob
 name = 'BWL'
 type = 'latin'
 caps = 'precapped'
+convert_xml = False
 
 # regex patterns
 head_flag = re.compile('<term ')

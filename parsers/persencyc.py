@@ -34,6 +34,7 @@ from glob import glob
 name = 'PerseusEncyclopedia'
 type = 'latin'
 caps = 'source'
+convert_xml = True
 
 # regex patterns
 find_head = re.compile('<head(.)*?/head>')

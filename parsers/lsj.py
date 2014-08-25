@@ -21,6 +21,7 @@ from glob import glob
 name = 'LSJ'
 type = 'greek'
 caps = 'precapped'
+convert_xml = True
 
 # regex patterns
 find_head = re.compile('<head(.)*?/head>')
