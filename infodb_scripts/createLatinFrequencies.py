@@ -8,8 +8,8 @@ from BeautifulSoup import BeautifulStoneSoup
 
 def main():
     prog = sys.argv[0].split('/')[-1]
-    usage = prog + ' [LATININFODB]'
-    dbname = 'latinInfo.db'
+    usage = 'Usage: %s [LATININFODB]' % prog
+    dbname = 'greekInfo.db'
     if len(sys.argv[1:]) > 1:
         print >> sys.stderr, '%s: error: need at most one argument' % prog
         print >> sys.stderr, usage
@@ -30,7 +30,7 @@ def main():
         print >> sys.stderr, '%s: %s' % (prog, str(e))
         sys.exit(1)
 
-    f = urllib2.urlopen("http://perseus.uchicago.edu/cgi-bin/LatinFrequency.pl?author=&title=&genre=&editor=&language=NOT+English&displaymorethan=49&displaylessthan=1000000000&sortby=decreasingFreq&searchby=searchbylemma")
+    f = urllib2.urlopen("http://perseus.uchicago.edu/cgi-bin/LatinFrequency.pl?author=&title=&genre=&editor=&displaymorethan=49&displaylessthan=1000000&sortby=decreasingFreq&searchby=searchbylemma&language=NOT+English")
     soup = BeautifulStoneSoup(f.read())
     f.close()
 

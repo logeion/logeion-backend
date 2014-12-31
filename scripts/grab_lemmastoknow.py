@@ -22,9 +22,11 @@ def main():
     conn.row_factory = lambda _,r: '\t'.join(map(str, r))
     cursor = conn.cursor()
     for table in dicos_to_pull:
+        target_file = table.lower()+'.dat'
+        print 'Printing %s -> %s' % (table, target_file)
         cursor.execute('select * from '+table) # Assuming no injection from ourselves
         try:
-            outfh = open(table.lower()+'.dat', 'w')
+            outfh = open(target_file, 'w')
             print >> outfh, '\n'.join(cursor.fetchall())
         except IOError, e:
             print >> sys.stderr, "%s: warning: could not open %s for write: %s" \

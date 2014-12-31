@@ -21,6 +21,9 @@ def usage(prog):
     print '    --bibliography <bib>'
     print '        File for getting mapping from file names to author/work;'
     print '        should be in /var/lib/philologic/databases/<database>/'
+    print '    --confirm'
+    print '        If present, displays a prompt for user to double-'
+    print '        check the input arguments'
     print '    --help'
 
 def check_db_or_die(db):
@@ -52,6 +55,8 @@ def parse_args(args):
         elif a == '--bibliography':
             options['bibliography'] = args[i+1]
             i += 1
+        elif a == '--confirm':
+            options['confirm'] = True
         elif a == '--help':
             usage(prog)
             sys.exit(0)
@@ -120,12 +125,14 @@ def main():
     print 'Using "%s" as info db' % infodb
     print 'Using "%s" as lexicon' % lexicon
     print 'Using "%s" as bibliography' % bibliography
-    yn = None
-    while yn not in ('y', 'n', 'yes', 'no', ''):
-        yn = raw_input("Are these arguments OK? (Y/n) ").lower().strip()
-    if yn in ('n','no'):
-        usage(prog)
-        sys.exit(0)
+
+    if 'confirm' in options:
+        yn = None
+        while yn not in ('y', 'n', 'yes', 'no', ''):
+            yn = raw_input("Are these arguments OK? (Y/n) ").lower().strip()
+        if yn in ('n','no'):
+            usage(prog)
+            sys.exit(0)
 
     check_db_or_die(infodb)
     check_db_or_die(lexicon)

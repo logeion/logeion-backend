@@ -47,21 +47,25 @@ def main():
     usage = 'Usage: %s <lemmastoknow> <lexicon>' % prog
     usage += '\nlemmastoknow: db containing modified textbook/shortdefs info; r/w'
     usage += '\nlexicon:      standard Perseus lexicon file (e.g. GreekLexicon.db); read-only'
+    print 'Validating database names and command-line args'
     lemmastoknow, lexicon = validate_args(sys.argv[1:])
     lex_conn, lex_cursor = validate_db_and_connect(lexicon)
     lex_shortdefs = lex_cursor.execute('select * from shortdefs').fetchall()
     lex_conn.close()
     lem_conn, lem_cursor = validate_db_and_connect(lemmastoknow)
     # For some reason, SQLite isn't allowing "insert ... values (select * ...);" syntax
+    print 'Replacing lemmastoknow Perseusshortdefs with Lexicon shortdefs'
     lem_cursor.execute('delete from Perseusshortdefs')
     for e in lex_shortdefs:
         lem_cursor.execute('insert or replace into Perseusshortdefs values (?,?)', e)
+    print 'Replacing lemmastoknow shortdefs selectively by dictionary'
     lem_cursor.execute('delete from shortdefs')
     lem_cursor.execute('insert into shortdefs select * from Perseusshortdefs')
     for e in lex_shortdefs:
         insert_new_value(e, lem_cursor)
     lem_conn.commit()
     lem_conn.close()
+    print 'Finished!'
 
 if __name__ == '__main__':
     main()

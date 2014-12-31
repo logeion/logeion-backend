@@ -8,13 +8,14 @@ import re
 import sqlite3
 import sys
 import urllib2
+import operator
 
 dict_home    = '/Volumes/data/var/lib/philologic/databases/GreekFeb2011'
-infodb      = './greekInfo.db'
-lemmafile    = dict_home + '/frequencies/lemmafile'
-lexicon      = '/Library/WebServer/CGI-Executables/perseus/GreekLexicon.db'
-countbydocid = dict_home  + '/countbydocid'
-bibliography = dict_home + '/bibliography'
+default_infodb      = './greekInfo.db'
+#default_lemmafile    = dict_home + '/frequencies/lemmafile'
+default_lexicon      = '/Library/WebServer/CGI-Executables/perseus/GreekLexicon.db'
+default_countbydocid = dict_home  + '/countbydocid'
+default_bibliography = dict_home + '/bibliography'
 
 # Returns a array of counts indexed by docid
 def parse_text_counts(countbydocid):
@@ -54,34 +55,38 @@ def flatten_mappings(docid2count, author2texts):
 def usage(prog):
     print 'Usage: %s [options]' % prog
     print '    --infodb <info-db>'
-    print '    --lemmafile <lemma-file>'
+    #print '    --lemmafile <lemma-file>'
     print '    --lexicon <lexicon>'
     print '    --countbydocid <countbydocid-file>'
     print '    --bibliography <bibliography-file>'
+    print '    --confirm'
     print '    --help'
 
 def parse_arguments(args):
-    global infodb, lemmafile, lexicon, countbydocid, bibliography, prog
+    options = {}
     args = sys.argv[1:]
     argc = len(args)
     i = 0
     while i < argc:
         try:
             if args[i] == '--infodb':
-                infodb = args[i+1]
+                options['infodb'] = args[i+1]
                 i += 2
-            elif args[i] == '--lemmafile':
-                lemmafile = args[i+1]
-                i += 2
+            #elif args[i] == '--lemmafile':
+            #    options['lemmafile'] = args[i+1]
+            #    i += 2
             elif args[i] == '--lexicon':
-                lexicon = args[i+1]
+                options['lexicon'] = args[i+1]
                 i += 2
             elif args[i] == '--countbydocid':
-                countbydocid = args[i+1]
+                options['countbydocid'] = args[i+1]
                 i += 2
             elif args[i] == '--bibliography':
-                bibliography = args[i+1]
+                options['bibliography'] = args[i+1]
                 i += 2
+            elif args[i] == '--confirm':
+                options['confirm'] = True
+                i += 1
             elif args[i] == '--help':
                 usage(prog)
                 sys.exit(0)
@@ -93,27 +98,46 @@ def parse_arguments(args):
             print >> sys.stderr, '%s: error: no value following %s' % (prog, args[i])
             usage(prog)
             sys.exit(1)
+    return options
 
 def main():
-    global infodb, lemmafile, lexicon, countbydocid, bibliography, prog
+    global prog
     prog = sys.argv[0].split('/')[-1]
-    parse_arguments(sys.argv[1:])
-        
+    options = parse_arguments(sys.argv[1:])
+    infodb = default_infodb \
+            if 'infodb' not in options \
+            else options['infodb']
+    """
+    lemmafile = default_lemmafile \
+            if 'lemmafile' not in options \
+            else options['lemmafile']
+    """
+    lexicon = default_lexicon \
+            if 'lexicon' not in options \
+            else options['lexicon'] 
+    countbydocid = default_countbydocid \
+            if 'countbydocid' not in options \
+            else options['countbydocid']
+    bibliography = default_bibliography \
+            if 'bibliography' not in options \
+            else options['bibliography']
+
     print 'Using ' + infodb + ' as info db'
-    print 'Using ' + lemmafile + ' as lemma file'
+    #print 'Using ' + lemmafile + ' as lemma file'
     print 'Using ' + lexicon + ' as lexicon'
     print 'Using ' + countbydocid + ' as countbydocid file'
     print 'Using ' + bibliography + ' as bibliography file'
 
-    yn = ''
-    while yn not in ('y', 'n', 'yes', 'no'):
-        yn = raw_input("Are these arguments OK? (y/n) ").lower()
-    if yn in ('n','no'):
-        usage(prog)
-        sys.exit(0)
+    if 'confirm' in options:
+        yn = ''
+        while yn not in ('y', 'n', 'yes', 'no'):
+            yn = raw_input("Are these arguments OK? (y/n) ").lower()
+        if yn in ('n','no'):
+            usage(prog)
+            sys.exit(0)
 
     try:
-        open(lemmafile).close()
+        #open(lemmafile).close()
         open(countbydocid).close()
         open(lexicon).close()
         sqlite3.connect(lexicon).cursor().execute('select * from Lexicon limit 1')
@@ -150,17 +174,74 @@ def main():
     # from other entries later
     print 'Reading lemmas...'
     all_lemmas = dict()
-    with open(lemmafile) as infh:
-        for line in infh:
-            if line.strip() and len(line.strip().split('\t')) > 1:
-                tokenid, lemma = line.strip().decode('utf-8').split('\t')
-                if lemma in all_lemmas:
-                    all_lemmas[lemma].append(int(tokenid))
-                else:
-                    all_lemmas[lemma] = [int(tokenid)]
-    all_lemmas.pop('nolemma')
-    all_lemmas.pop('textbound')
+
+
+
+
+
+
+
+    db = sqlite3.connect(lexicon)
+    db.row_factory = sqlite3.Row
+    curs = db.cursor()
+    curs.execute('\
+SELECT tokens.tokenid, Lexicon.lemma, parses.prob \
+FROM tokens LEFT JOIN parses \
+ON tokens.tokenid = parses.tokenid \
+LEFT JOIN Lexicon \
+ON parses.lex = Lexicon.lexid')
+
+    # Aggregate entries with the same tid
+    # (i.e. different parses of same token)
+    i = 0
+    aggr_rows = {}
+    for row in curs.fetchall():
+        i += 1
+        tid = row['tokenid']
+        if tid not in aggr_rows:
+            aggr_rows[tid] = [row]
+        else:
+            aggr_rows[tid].append(row)
+
+    # Now choose only tids where prob is max
+    print >> sys.stderr, i
+    print >> sys.stderr, len(aggr_rows)
+
+    # Alright, so here's some crazy bullshit: there something like 40k
+    # missing tokenids, so we need to fill those in somehow: if a tokenid
+    # is missing in the tokens table, then we fill it in with 'nolemma',
+    # and '' is reserved for entries in the tokens table without a parse
+    # (i.e. punctuation and headers)
+
+    i = 1
+    entries = []
+    sorted_items = sorted(aggr_rows.items(), key=operator.itemgetter(0))
+    for tid,rs in sorted_items:
+        #print 'i = %d, tid = %d' % (i,tid)
+        while i < tid:
+            #entries[i] = u'nolemma'
+            entries.append(u'')
+            i += 1
+        r = sorted(rs, key=operator.itemgetter('prob'), reverse=True)[0]
+        if r['lemma']:
+            #entries[tid] = r['lemma']
+            entries.append(r['lemma'])
+        else:
+            #entries[tid] = u''
+            entries.append(u'')
+        i += 1
+    print >> sys.stderr, 'Reversing mapping...'
+    for i,e in enumerate(entries):
+        if e and e not in all_lemmas:
+            all_lemmas[e] = [i]
+        elif e:
+            all_lemmas[e].append(i)
+
     print len(all_lemmas), 'lemmas found.'
+
+
+
+
 
     print 'Creating docid-to-wordcount mapping'
     docids2counts = parse_text_counts(countbydocid)

@@ -1,24 +1,26 @@
 #!/usr/bin/env python
+# coding=utf-8
 
 import sqlite3
 import re
 import operator
+import unicodedata
 import sys
 
 # Do basic config: grab lexicon location, assign infodb and lemmafile,
 # and check that lexicon and lemmafile exist and are readable
 
 infodb    = './latinInfo.db'
-lemmafile = '/Volumes/data/var/lib/philologic/databases/LatinAugust2012/frequencies/lemmafile'
 lexicon   = '/Library/WebServer/CGI-Executables/perseus/LatinLexicon.db'
+confirm = False
 
 prog = sys.argv[0].split('/')[-1]
 
 def usage(prog):
     print 'usage: %s [options]' % prog
     print '    --infodb <info-db>'
-    print '    --lemmafile <lemma-file>'
     print '    --lexicon <lexicon>'
+    print '    --confirm'
 
 # Get command-line arguments
 args = sys.argv[1:]
@@ -29,12 +31,12 @@ while i < argc:
         if args[i] == '--infodb':
             infodb = args[i+1]
             i += 2
-        elif args[i] == '--lemmafile':
-            lemmafile = args[i+1]
-            i += 2
         elif args[i] == '--lexicon':
             lexicon = args[i+1]
             i += 2
+        elif args[i] == '--confirm':
+            confirm = True
+            i += 1
         else:
             print >> sys.stderr, '%s: error: unrecognized arg %s' % (prog, args[i])
             usage(prog)
@@ -45,19 +47,18 @@ while i < argc:
         sys.exit(1)
 
 print 'Using "%s" as info db' % infodb
-print 'Using "%s" as lemma file' % lemmafile
 print 'Using "%s" as lexicon' % lexicon
 
-yn = ''
-while yn not in ('y', 'n', 'yes', 'no'):
-    yn = raw_input("Are these arguments OK? (y/n) ").lower()
-if yn in ('n','no'):
-    usage(prog)
-    sys.exit(0)
+if confirm:
+    yn = ''
+    while yn not in ('y', 'n', 'yes', 'no'):
+        yn = raw_input("Are these arguments OK? (y/n) ").lower()
+    if yn in ('n','no'):
+        usage(prog)
+        sys.exit(0)
 
 try:
     open(lexicon).close()
-    open(lemmafile).close()
 except IOError, e:
     print >> sys.stderr, '%s: %s' % (prog, str(e))
     sys.exit(1)
@@ -65,135 +66,184 @@ except IOError, e:
 # Read in lemmas; lemmafile contains tab-separated fields of (tokenid, lemma)
 # for all tokenids
 
-f = open(lemmafile)
-lines = []
-i = 0
-for line in f:
-    if i % 100000 == 0:
-        print str(i)
-    if line.strip():
-        s = re.split('\t', line)
-        lines.append(s[1].strip())
-    i += 1
-    
-f.close()
-
-# Set up lexicon
+#print 'Reading lemma file...'
+print 'Obtaining tokenid-to-lemma mapping...'
 
 db = sqlite3.connect(lexicon)
+db.row_factory = sqlite3.Row
 curs = db.cursor()
+curs.execute('\
+SELECT tokens.tokenid, Lexicon.lemma, parses.prob \
+FROM tokens LEFT JOIN parses \
+ON tokens.tokenid = parses.tokenid \
+LEFT JOIN Lexicon \
+ON parses.lex = Lexicon.lexid')
 
-stopwords = ['et',
-             'non',
-             'qui',
-             'in',
-             'is',
-             'atque',
-             'neque',
-             'autem',
-             'ne',
-             'sum',
-             'hic',
-             'ut',
-             'ab',
-             'ad',
-             'cum',
-             'cum2',
-             'de2',
-             'inter',
-             'per',
-             'ex',
-             'ego',
-             'tu',
-             'sed',
-             'si',
-             'omnis',
-             'quam',
-             'quis',
-             'quod',
-             'ille',
-             'illa',
-             'ipse',
-             'meus',
-             'tuus',
-             'suus',
-             'sui']
+# Aggregate entries with the same tid
+# (i.e. different parses of same token)
+i = 0
+aggr_rows = {}
+for row in curs.fetchall():
+    i += 1
+    tid = row['tokenid']
+    if tid not in aggr_rows:
+        aggr_rows[tid] = [row]
+    else:
+        aggr_rows[tid].append(row)
 
-i = 5
+# Now choose only tids where prob is max
+print >> sys.stderr, i
+print >> sys.stderr, len(aggr_rows)
+
+# Alright, so here's some crazy bullshit: there something like 40k
+# missing tokenids, so we need to fill those in somehow: if a tokenid
+# is missing in the tokens table, then we fill it in with 'nolemma',
+# and '' is reserved for entries in the tokens table without a parse
+# (i.e. punctuation and headers)
+
+i = 1
+entries = []
+sorted_items = sorted(aggr_rows.items(), key=operator.itemgetter(0))
+for tid,rs in sorted_items:
+    #print 'i = %d, tid = %d' % (i,tid)
+    while i < tid:
+        #entries[i] = u'nolemma'
+        entries.append(u'')
+        i += 1
+    r = sorted(rs, key=operator.itemgetter('prob'), reverse=True)[0]
+    if r['lemma']:
+        #entries[tid] = r['lemma']
+        entries.append(r['lemma'])
+    else:
+        #entries[tid] = u''
+        entries.append(u'')
+    i += 1
+
+print >> sys.stderr, len(entries)
+#for i,l in enumerate(entries):
+#    print '%d|%s' % (i,l.encode('utf-8'))
+#sys.exit(0)
+
+stopwords = [u'et',
+             u'non',
+             u'qui',
+             u'in',
+             u'is',
+             u'atque',
+             u'neque',
+             u'autem',
+             u'ne',
+             u'sum',
+             u'hic',
+             u'ut',
+             u'ab',
+             u'ad',
+             u'cum',
+             u'cum2',
+             u'de2',
+             u'inter',
+             u'per',
+             u'ex',
+             u'ego',
+             u'tu',
+             u'sed',
+             u'si',
+             u'omnis',
+             u'quam',
+             u'quis',
+             u'quod',
+             u'ille',
+             u'illa',
+             u'ipse',
+             u'meus',
+             u'tuus',
+             u'suus',
+             u'sui']
+              
+#i = 5
 
 word = ""
 left = []
 right = []
 counts = {}
 
-# Now, grab 5-word context from lexicon for each token
+lemmas_to_skip = (u'nolemma', u'<unknown>', u'textbound')
+end_of_sentence = (u'.', u'?', u'!')
 
-while i < len(lines):
+# Now, grab 5-word context from lexicon for each token; compare accentless
+print '\nGrabbing context from lexicon...'
+print 'entries[:5] = [', u','.join(entries[:5]).encode('utf-8'), ']'
+#for i,word in entries:
+for i,word in enumerate(entries):
     if i % 100000 == 0:
-        print str(i)
+        print str(i),
+        sys.stdout.flush()
+    tid = i+1
     
-    word = lines[i]
-    if word == "nolemma" or word == "<unknown>" or word == "textbound":
-        i += 1
+    if not word or word in lemmas_to_skip:
         continue
 
-    left = lines[i-5:i]
+    left = entries[i-5:i]
     left.reverse()
-    right = lines[i+1:i+6]
+    right = entries[i+1:i+6]
     
     if not word in counts:
         counts[word] = {}
     
+    # TODO: implement 'nolemma'
     for l in left:
-        if l == "nolemma":
-            curs.execute("select content from tokens where tokenid=?", (i,))
-            try: 
-                punct = curs.fetchone()[0].encode("utf-8")
+        accentless = u''.join([c for c in unicodedata.normalize("NFD", l) \
+                              if unicodedata.category(c) != 'Mn'])
+        if not l:
+            curs.execute("select content from tokens where tokenid=?", (tid,))
+            try:
+                punct = curs.fetchone()[0]
             except TypeError:
-                print "Bad tokenid @ " + str(i)
+                #print "Bad tokenid @ " + str(i)
+                print tid, 'not in table'
             else:
-                if punct == '.' or punct == '?' or punct == '!':
+                # If end of sentence, stop gathering context
+                if punct in end_of_sentence:
                     break
                 continue
-        elif l == "textbound":
-            break
-        elif l == "<unknown>" or l in stopwords:
+        elif accentless in stopwords:
             continue
             
         if l in counts[word]:
             counts[word][l] += 1
         else:
             counts[word][l] = 1
-    
+
     for r in right:
-        if r == "nolemma":
-            curs.execute("select content from tokens where tokenid=?", (i,))
-            try: 
-                punct = curs.fetchone()[0].encode("utf-8")
+        accentless = u''.join([c for c in unicodedata.normalize("NFD", r) \
+                              if unicodedata.category(c) != 'Mn'])
+        if not r:
+            curs.execute("select content from tokens where tokenid=?", (tid,))
+            try:
+                punct = curs.fetchone()[0]
             except TypeError:
-                print "Bad tokenid @ " + str(i)
+                print tid, 'not in table'
             else:
-                if punct == '.' or punct == '?' or punct == '!':
+                # If end of sentence, stop gathering context
+                if punct in end_of_sentence:
                     break
                 continue
-        elif r == "textbound":
-            break
-        elif r == "<unknown>" or r in stopwords:
+        elif accentless in stopwords:
             continue
             
         if r in counts[word]:
             counts[word][r] += 1
         else:
             counts[word][r] = 1
-    
-    i += 1
 
 sortedCounts = sorted(counts.iteritems())
-print "# of lemmas = " + str(len(sortedCounts))
+print "\n# of lemmas = " + str(len(sortedCounts))
 i = 0
 db.close()
 
 # Organize results and write them out to info db
+
+print 'Organizing results and writing to db...'
 
 db = sqlite3.connect(infodb)
 curs = db.cursor()
@@ -205,7 +255,8 @@ create index c_l on collocations(lookupform);""")
 
 for w, cs in sortedCounts:
     if i % 1000 == 0:
-        print str(i)
+        print str(i),
+        sys.stdout.flush()
     
     sorted_cs = sorted(cs.iteritems(), key=operator.itemgetter(1))
     sorted_cs.reverse()
