@@ -37,6 +37,8 @@ Usage: %s [options] [dico ...]
                     Folder containing the dictionary source folders; defaults to
                     ./dictionaries
     --help          Display this message and exit
+    --modify        Do not delete entries if the target db already exists
+                    (entries are deleted by default).
     --level <level> Log at level <level>; default is INFO. Case-insensitive.
                     Options: %s""" \
                     % (prog, str([f for f in dir(logging) 
@@ -254,12 +256,12 @@ def change_to_lookup(head):
         except UnicodeDecodeError:
             head = head.decode('latin1')
     tmp = unicodedata.normalize('NFD', head)
-    head = ''.join([c for c in tmp if not_length_marker(c)])
+    head = u''.join([c for c in tmp if not_length_marker(c)])
     head = unicodedata.normalize('NFC', head) # recombine characters
     return re.sub('[0-9\[\]]', '', head)
 
 # Stores each dico
-def dico_loader(dico, entries):
+def dico_loader(dico, entries, modify=False):
     if not entries: # Usually due to parser error
     	sys.stdout.flush()
         return False
@@ -269,24 +271,20 @@ def dico_loader(dico, entries):
             # Take entities out of all values
             #entry = dict([(x, unescape(y)) for (x, y) in entry.items()])
             if 'orth_orig' not in entry.keys() or entry['orth_orig'] is None:
-                #entry['orth_orig'] = ""
                 entry['orth_orig'] = entry['head']
-            c.execute('insert into Entries values (?,?,?,?,?)',
-                (entry['head'], entry['orth_orig'],
-                 entry['content'], dico, change_to_lookup(entry['head'])))
+            c.execute('insert into Entries values (?,?,?,?,?)', \
+                (entry['head'], entry['orth_orig'], entry['content'], dico, change_to_lookup(entry['head'])))
     else:
         c.execute('delete from Sidebar where dico=(?)', (dico,))
         for entry in entries: 
-            c.execute('insert into Sidebar values (?,?,?,?,?)', (entry['head'], entry['content'],
-            entry['chapter'], dico, change_to_lookup(entry['head'])))
-
+            c.execute('insert into Sidebar values (?,?,?,?,?)', \
+                (entry['head'], entry['content'], entry['chapter'], dico, change_to_lookup(entry['head'])))
     return True
 
 #######################
 #        SETUP        #
 #######################
 
-# Setup SQLite connection
 args = sys.argv[1:]
 if not args:
     print >> sys.stderr, usage
@@ -310,6 +308,8 @@ uncapped = [d.name for d in all_dicos.values() if d.caps == 'uncapped']
 source = [d.name for d in all_dicos.values() if d.caps == 'source']
 convert_xml = [d.name for d in all_dicos.values() \
                if hasattr(d, 'convert_xml') and d.convert_xml]
+disabled = [d.name for d in all_dicos.values() \
+            if hasattr(d, 'enabled') and not d.enabled]
 
 # Parse command-line arguments
 dicos = {}
@@ -319,11 +319,14 @@ dbname = 'new_dvlg-wheel.sqlite'
 dico_root = './dictionaries'
 notdbs = None
 loglevel = logging.INFO
+modify = False
 i = 0
 while i < len(args):
     if args[i] == '--help':
         print >> sys.stderr, usage
         sys.exit(0)
+    elif args[i] == '--modify':
+        modify = True
     elif args[i] == '--level': # set log level
         levelname = logging.getLevelName(args[i+1].upper())
         loglevel = levelname if type(levelname) is int else loglevel
@@ -359,7 +362,13 @@ while i < len(args):
 
 if notdbs:
     for ndb in notdbs:
-        if ndb in dicos: del dicos[ndb]
+        if ndb in dicos:
+            del dicos[ndb]
+            print 'Not processing %s' % ndb
+for dd in disabled:
+    if dd in dicos:
+        del dicos[dd]
+
 conn = sqlite3.connect(dbname)
 conn.text_factory = str
 c = conn.cursor()
@@ -381,32 +390,41 @@ lFlag = any([k in latin_dicos for k in dicos])
 gFlag = any([k in greek_dicos for k in dicos])
 cFlag = any([k in uncapped    for k in dicos])
 
+
 #######################
 #       PARSERS       #
 #######################
 
 # Create dico tables in wheel from those in final
-print 'Parsing dictionary files...'
 try: # See if Entries already exists; if not, create it and index
     c.execute('select lookupform from Entries')
 except(sqlite3.OperationalError):
     c.executescript('create table Entries(head text, orth_orig text, content text, dico text, lookupform text); \
                      create index lookupform_index_e on Entries (lookupform);')
+else: # If Entries does exist, delete all rows in it
+    if not modify:
+        print 'Clearing current Entries table...'
+        c.execute('delete from Entries')
+
 try: # See if Sidebar already exists; if not, create it
     c.execute('select lookupform from Sidebar')
 except(sqlite3.OperationalError):
     c.executescript('create table Sidebar(head text, content text, chapter text, dico text, lookupform text); \
                      create index lookupform_index_s on Sidebar (lookupform);')
+else: # If Sidebar does exist, delete all rows in it
+    if not modify:
+        print 'Clearing current Sidebar table...'
+        c.execute('delete from Sidebar')
 
 # Parse each dico and send the resulting list to dico_loader
+print 'Parsing dictionary files...'
 for dico in dicos:
     spcs = ' '*(25-len(dico))
     logging.info('Parsing %s:', dico)
     sys.stdout.write('\t%s:%sparsing\r' % (dico, spcs)) 
     sys.stdout.flush()
     try:
-        #dico_parsed, tobelogged = getattr(dicos[dico], 'parse')('dictionaries/'+dico)
-        dico_parsed, tobelogged = getattr(dicos[dico], 'parse')(dico_root+'/'+dico)
+        dico_parsed, tobelogged = getattr(dicos[dico], 'parse')(os.path.join(dico_root, dico))
         logging.info(dico + ' finished parsing; applying html cleanup and inserting into db')
     except(Exception), e: # Either error in calling the actual function itself or in documenting normal error
         logging.warning('While parsing %s: %s' % (dico, e))
@@ -432,7 +450,7 @@ for dico in dicos:
         sys.stdout.flush()
         if dico in convert_xml:
             dico_parsed = clean_xml_and_convert(dico_parsed)
-        loaded_successfully = dico_loader(dico, dico_parsed)
+        loaded_successfully = dico_loader(dico, dico_parsed, modify)
         if tobelogged['warning']:
             sys.stdout.write('\t%s:%snon-fatal errors during parse; check log.\n' % (dico, spcs))
         elif not loaded_successfully:
@@ -518,7 +536,8 @@ else:
         
         todo = len(this_dico)
         done = 0
-        c.execute('delete from Entries where dico=(?)', (ucd,))
+        if not modify:
+            c.execute('delete from Entries where dico=(?)', (ucd,))
         for each in this_dico:
             done += 1
             sys.stdout.write('\t%s:%supdating  %06d/%06d\r' % (ucd, spcs, done, todo))

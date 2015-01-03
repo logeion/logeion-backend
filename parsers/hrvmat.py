@@ -2,6 +2,7 @@ name = 'hrvmatlat'
 type = 'latin'
 caps = 'precapped'
 convert_xml = False
+enabled = False
 
 def parse(dico_path):
   xmlfile = dico_path+'/hrvmatlat.csv'
