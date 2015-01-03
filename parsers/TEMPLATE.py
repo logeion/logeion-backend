@@ -9,7 +9,7 @@ from __future__ import with_statement
 from glob import glob
 
 name = 'YOUR_DICO_NAME' # The name as it will appear in Logeion
-type = '' # 'latin' or 'greek'
+type = '' # 'latin', 'greek', or 'sidebar' (if it's a textbook)
 caps = '' # 'precapped', 'uncapped', or 'source'
 convert_xml = False # -> True if you want lists converted to HTML
 enabled = False # Remove this line when your parser is ready
