@@ -4,7 +4,37 @@
 # the options here; the only one you should pass in is the info db. 
 #       - MS
 
-./createLatinAuthorFreqs.py --infodb "$1"
-./createLatinFrequencies.py "$1"
-./createLatinCollocations.py --infodb "$1"
-./createLatinSamples.py --infodb "$1"
+prog=$(basename "$0")
+if [ $# -ne 1 ]
+then
+    test $# -gt 1 && echo "$prog: error: need exactly 1 argument" >&2
+    echo "Usage: $prog [infodb]" >&2
+    exit $(test $# -eq 0)   # = 0 if no args, 1 if too many args
+
+    # FUN FACT: If you don't care about precise exit codes, then you can
+    # just do `exit $#`. Amaze your friends! Confound your enemies!
+    # Debase the art of programming!
+
+fi
+# Either the target infodb file exists and is writeable,
+# or it doesn't exist but we can write to the directory
+if [ -f "$1" -a ! -w "$1" ] || [ ! -f "$1" -a ! -w "$(dirname '$1')" ]
+then
+    echo "$prog: error: cannot write to file $1" >&2
+    exit 1
+fi
+
+function print_header {
+    echo "##############################################"
+    echo "Starting $0"
+    echo "##############################################"
+}
+
+print_header createLatinAuthorFreqs && \
+    ./createLatinAuthorFreqs.py --infodb "$1"
+test $? -eq 0 && print_header createLatinFrequencies && \
+    ./createLatinFrequencies.py "$1"
+test $? -eq 0 && print_header createLatinCollocations && \
+    ./createLatinCollocations.py --infodb "$1"
+test $? -eq 0 && print_header createLatinSamples && \
+    ./createLatinSamples.py --infodb "$1"
