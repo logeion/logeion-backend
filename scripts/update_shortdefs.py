@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# Based on the shortdefs table in <lexicon> and the definitions of various textbooks,
+# reconstructs the shortdefs list in the <lemmastoknow> database apporiately.
 import sqlite3, sys
 
 def validate_args(argv):
