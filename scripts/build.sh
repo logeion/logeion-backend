@@ -20,6 +20,11 @@ function print_header () {
     echo "######################################"
 }
 
+function log_and_move () {
+    echo "Moving $1 -> $2"
+    mv "$1" "$2"
+}
+
 prog=$(basename "$0")
 scripts_dir=$(dirname "$0")
 . "$scripts_dir/build.config"
@@ -45,11 +50,11 @@ fi
 mkdir "$logeion_staging"
 "$scripts_dir/grab_lemmastoknow.py" --lemmastoknow "$lemmastoknow" \
     --outdir "$logeion_staging" all
-mv "$logeion_staging/mastro.dat" "$dico_root/Mastronarde"
-mv "$logeion_staging/hq.dat" "$dico_root/HansenQuinn"
-mv "$logeion_staging/jact.dat" "$dico_root/JACT"
-mv "$logeion_staging/ltrg.dat" "$dico_root/LTRG"
-mv "$logeion_staging/shortdefs.dat" "$dico_root/GreekShortDefs"
+log_and_move "$logeion_staging/mastro.dat" "$dico_root/Mastronarde"
+log_and_move "$logeion_staging/hq.dat" "$dico_root/HansenQuinn"
+log_and_move "$logeion_staging/jact.dat" "$dico_root/JACT"
+log_and_move "$logeion_staging/ltrg.dat" "$dico_root/LTRG"
+log_and_move "$logeion_staging/shortdefs.dat" "$dico_root/GreekShortDefs"
 rm -r "$logeion_staging"
 
 print_header "3) Running logeion_parse.py $logeion_args"
