@@ -58,6 +58,8 @@ log_and_move "$logeion_staging/shortdefs.dat" "$dico_root/GreekShortDefs"
 rm -r "$logeion_staging"
 
 print_header "3) Running logeion_parse.py $logeion_args"
+echo "Changing directory -> $logeion_root"
 cd "$logeion_root"
 "$logeion_root/logeion_parse.py" $logeion_args
+echo "Returning to calling directory"
 cd -
