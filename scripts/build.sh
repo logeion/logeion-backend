@@ -113,7 +113,6 @@ if [ $dump = true ]; then
     echo "logeion_args: $logeion_args"
     exit 0
 fi
-    
 
 if [ -n "$lemmastoknow" ]; then
     print_header "1) Updating shortdefs"
