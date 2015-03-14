@@ -27,6 +27,17 @@ def clean_content(content):
     content = content.replace('|', '/') # Remarkably, this doesn't break anything
     return content
 
+# <loc><type><wk>A</wk></type></loc><loc>3</loc> -> <loc><type><wk>A</wk><loc>3</loc></type></loc>
+def fix_sibling_locs(entry):
+    locs = entry.findAll('loc')
+    # We shouldn't run into any aliasing issues here - if we extract a loc's sibling and add it as the last
+    # child to loc's parent, then when that sibling shows up in this loop the loc.nextSibling test will fail
+    for loc in locs:
+        if loc.nextSibling and hasattr(loc.nextSibling, 'name') and loc.nextSibling.name == 'loc':
+            loc_sibling = loc.nextSibling.extract()
+            type_child = loc.find('type')
+            type_child.append(loc_sibling)
+
 # Main method
 def parse(dico_path):
     dico_data = sorted(glob(os.path.join(dico_path, '*.xml')))
@@ -41,7 +52,11 @@ def parse(dico_path):
         content = ''
         with open(xmlfile) as infh:
             full_content = infh.read()
-            content = str(BeautifulStoneSoup(full_content).find('entry'))
+            soup = BeautifulStoneSoup(full_content)
+            entry = soup.find('entry')
+            if entry:
+                fix_sibling_locs(entry)
+            content = str(entry)
             content = clean_content(content)
 
         dico.append({'head': head,
