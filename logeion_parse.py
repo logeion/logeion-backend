@@ -14,6 +14,7 @@ import logging
 import unicodedata
 import htmlentitydefs
 import os.path
+import inspect
 
 try:
     from parsers import *
@@ -432,7 +433,19 @@ def main():
         sys.stdout.write('\t%s:%sparsing\r' % (dico, spcs)) 
         sys.stdout.flush()
         try:
-            dico_parsed, tobelogged = getattr(dicos[dico], 'parse')(os.path.join(dico_root, dico))
+            parse_func = getattr(dicos[dico], 'parse')
+        except(AttributeError):
+            logging.error('Could not find parse function in parser for dico %s' % dico)
+            sys.exit(-1)
+        try:
+            argspec = inspect.getargspec(parse_func)
+            if len(argspec.args) == 3: # New style: pass in logging functions directly
+                dico_parsed = parse_func(os.path.join(dico_root, dico), logging.info, logging.warning)
+            elif len(argspec.args) == 1: # Old style: return log statements instead of logging in parse function
+                dico_parsed, tobelogged = parse_func(os.path.join(dico_root, dico))
+                for level in tobelogged:
+                    for event in tobelogged[level]:
+                        getattr(logging, level)(event)
             logging.info(dico + ' finished parsing; applying html cleanup and inserting into db')
         except(Exception), e: # Either error in calling the actual function itself or in documenting normal error
             logging.warning('While parsing %s: %s' % (dico, e))
@@ -449,9 +462,6 @@ def main():
                 for k in dico_parsed[i]:
                     if isinstance(dico_parsed[i][k], unicode):
                         dico_parsed[i][k] = dico_parsed[i][k].encode('utf-8')
-            for level in tobelogged:
-                for event in tobelogged[level]:
-                    getattr(logging, level)(event)
 
             # Loads entries to SQLite table
             sys.stdout.write('\t%s:%sloading\r' % (dico, spcs))
