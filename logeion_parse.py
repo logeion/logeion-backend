@@ -439,13 +439,15 @@ def main():
             sys.exit(-1)
         try:
             argspec = inspect.getargspec(parse_func)
+            errors_occurred = False
             if len(argspec.args) == 3: # New style: pass in logging functions directly
-                dico_parsed = parse_func(os.path.join(dico_root, dico), logging.info, logging.warning)
+                dico_parsed, errors_occurred = parse_func(os.path.join(dico_root, dico), logging.info, logging.warning)
             elif len(argspec.args) == 1: # Old style: return log statements instead of logging in parse function
                 dico_parsed, tobelogged = parse_func(os.path.join(dico_root, dico))
                 for level in tobelogged:
                     for event in tobelogged[level]:
                         getattr(logging, level)(event)
+                errors_occurred = bool(tobelogged['warning'])
             logging.info(dico + ' finished parsing; applying html cleanup and inserting into db')
         except(Exception), e: # Either error in calling the actual function itself or in documenting normal error
             logging.warning('While parsing %s: %s' % (dico, e))
@@ -469,7 +471,7 @@ def main():
             if dico in convert_xml:
                 dico_parsed = clean_xml_and_convert(dico_parsed)
             loaded_successfully = dico_loader(dico, dico_parsed, modify)
-            if tobelogged['warning']:
+            if errors_occurred:
                 sys.stdout.write('\t%s:%snon-fatal errors during parse; check log.\n' % (dico, spcs))
             elif not loaded_successfully:
                 sys.stdout.write('\t%s:%sno entries passed.\n' % (dico, spcs))

@@ -39,10 +39,10 @@ def fix_sibling_locs(entry):
             type_child.append(loc_sibling)
 
 # Main method
-def parse(dico_path):
+def parse(dico_path, log, log_warning):
     dico_data = sorted(glob(os.path.join(dico_path, '*.xml')))
     dico = []
-    tobelogged = {'warning': [], 'info': []}
+    errors_occurred = False
 
     for xmlfile in dico_data:
         # Since we don't have diacritics in the headwords, we can
@@ -50,18 +50,22 @@ def parse(dico_path):
         xmlfile_leaf = os.path.basename(xmlfile)
         head = strip_extension.search(xmlfile_leaf).group(1)#.encode('utf-8')
         content = ''
-        with open(xmlfile) as infh:
-            full_content = infh.read()
-            soup = BeautifulStoneSoup(full_content)
-            entry = soup.find('entry')
-            if entry:
-                fix_sibling_locs(entry)
-            content = str(entry)
-            content = clean_content(content)
+        try:
+            with open(xmlfile) as infh:
+                full_content = infh.read()
+                soup = BeautifulStoneSoup(full_content)
+                entry = soup.find('entry')
+                if entry:
+                    fix_sibling_locs(entry)
+                content = str(entry)
+                content = clean_content(content)
 
-        dico.append({'head': head,
-                     'content': content})
+            dico.append({'head': head,
+                         'content': content})
 
-        tobelogged['info'].append('%s finished parsing' % xmlfile.split('/')[-1])
+            log('%s finished parsing' % xmlfile.split('/')[-1])
+        except(Exception), e:
+            log_warning('Error occurred while parsing %s: %s' % (xmlfile.split('/')[-1], str(e)))
+            errors_occurred = True
         
-    return dico, tobelogged
+    return dico, errors_occurred
