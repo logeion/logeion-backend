@@ -67,10 +67,10 @@ def clean_diacr(head):
     return newhead
 
 # Main method
-def parse(dico_path):
+def parse(dico_path, log, log_error):
     dico_data = sorted(glob(dico_path+'/latin_vocab.xml'))
     dico = []
-    tobelogged = {'warning': [], 'info': []}    
+    errors_occurred = False
 
     begin_exs = False
     exs = []
@@ -95,11 +95,11 @@ def parse(dico_path):
                         attrs = {'head': each.strip(), 'content': content.strip()}
                         dico.append(attrs)
                 except(Exception), e:
-                    tobelogged['warning'].append("%s couldn't parse line \"%s\"...: %s" \
+                    log_error("%s couldn't parse line \"%s\"...: %s" \
                     % (xmlfile.split('/')[-1], content[:50], e))
                 (head, content, exs) = ('', '', [])
                 begin_exs = False
         
-        tobelogged['info'].append('%s finished parsing' % xmlfile.split('/')[-1])
+        log('%s finished parsing' % xmlfile.split('/')[-1])
     
-    return dico, tobelogged
+    return dico, errors_occurred

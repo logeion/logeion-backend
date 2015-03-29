@@ -43,10 +43,10 @@ def cleanup_head(head):
     return head
 
 # Main method
-def parse(dico_path):
+def parse(dico_path, log, log_error):
     dico_data = sorted(glob(dico_path+'/*.xml'))
     dico = []
-    tobelogged = {'warning': [], 'info': []}
+    errors_occurred = False
 
     begin = False
     rendHead = False
@@ -76,9 +76,9 @@ def parse(dico_path):
                                                    # default, so we're fine
                     dico.append(attrs)
                 except(Exception), e:
-                    tobelogged['warning'].append("%s couldn't parse line \"%s\"...: %s" \
+                    log_error("%s couldn't parse line \"%s\"...: %s" \
                         % (xmlfile.split('/')[-1], str(entry)[:50], e))
                     
-        tobelogged['info'].append('%s finished parsing' % xmlfile.split('/')[-1])
+        log('%s finished parsing' % xmlfile.split('/')[-1])
         
-    return dico, tobelogged
+    return dico, errors_occurred

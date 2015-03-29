@@ -55,10 +55,10 @@ def make_headword(headword):
     return headword
 
 # Main method
-def parse(dico_path):
+def parse(dico_path, log, log_error):
     dico_data = sorted(glob(dico_path+'/homer_dico*'))
     dico = []
-    tobelogged = {'warning': [], 'info': []}
+    errors_occurred = False
 
     for xmlfile in dico_data:
         for line in open(xmlfile):
@@ -73,10 +73,11 @@ def parse(dico_path):
                     attrs.append({'head': component, 'content': content})
                 dico.extend(attrs)
             except(Exception), e:
-                tobelogged['warning'].append("%s couldn't parse line \"%s\"...: %s" \
-                % (xmlfile.split('/')[-1], content[:50], e))
+                log_error("%s couldn't parse line \"%s\"...: %s" \
+                    % (xmlfile.split('/')[-1], content[:50], e))
+                errors_occurred = True
             headword, content = '', ''
 
-        tobelogged['info'].append('%s finished parsing' % xmlfile.split('/')[-1])
+        log('%s finished parsing' % xmlfile.split('/')[-1])
 
-    return dico, tobelogged
+    return dico, errors_occurred

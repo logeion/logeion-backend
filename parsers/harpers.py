@@ -77,10 +77,10 @@ def clean_content(content):
     return content
 
 # Main method
-def parse(dico_path):
+def parse(dico_path, log, log_error):
     dico_data = sorted(glob(dico_path+'/harpers_cls_ant*'))
     dico = []
-    tobelogged = {'warning': [], 'info': []}
+    errors_occurred = False
 
     begin = False    
     for xmlfile in dico_data:        
@@ -104,8 +104,9 @@ def parse(dico_path):
                         attrs = {'head': head.lower().strip(), 'content': content}
                         dico.append(attrs)
                 except(Exception), e:
-                    tobelogged['warning'].append("%s couldn't parse line \"%s\"...: %s" \
-                    % (xmlfile.split('/')[-1], content[:50], e))
+                    log_error("%s couldn't parse line \"%s\"...: %s" \
+                        % (xmlfile.split('/')[-1], content[:50], e))
+                    errors_occurred = True
                 (headword, content) = ('', '')
                 begin = False
                 head_found = False
@@ -116,6 +117,6 @@ def parse(dico_path):
             elif begin:
                 content += line
                     
-        tobelogged['info'].append('%s finished parsing' % xmlfile.split('/')[-1])
+        log('%s finished parsing' % xmlfile.split('/')[-1])
     
-    return dico, tobelogged
+    return dico, errors_occurred

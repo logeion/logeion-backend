@@ -69,10 +69,10 @@ def cleanup_entry(entry):
 dash = '-'.decode('utf-8')
 
 # Main method
-def parse(dico_path):
+def parse(dico_path, log, log_error):
     dico_data = sorted(glob(dico_path+'/*.xml'))
     dico = []
-    tobelogged = {'warning': [], 'info': []}
+    errors_occurred = False
 
     for xmlfile in dico_data:
         with open(xmlfile) as infh:
@@ -81,7 +81,6 @@ def parse(dico_path):
                 try:
                     head = entry['xml:id']
                     orth_orig = entry.find('orth', type='lemma').text
-
 
                     # Usually, the xml:id attr is more accurate, but it doesn't
                     # distinguish between a dash and whitespace, so we take form
@@ -98,9 +97,10 @@ def parse(dico_path):
                              'content': entry}
                     dico.append(attrs)
                 except(Exception), e:
-                    tobelogged['warning'].append("%s couldn't parse line \"%s\"...: %s" \
-                    % (xmlfile.split('/')[-1], str(entry).decode('utf-8')[:50], str(e)))
+                    log_error("%s couldn't parse line \"%s\"...: %s" \
+                        % (xmlfile.split('/')[-1], str(entry).decode('utf-8')[:50], str(e)))
+                    errors_occurred = True
                     
-        tobelogged['info'].append('%s finished parsing' % xmlfile.split('/')[-1])
+        log('%s finished parsing' % xmlfile.split('/')[-1])
         
-    return dico, tobelogged
+    return dico, errors_occurred

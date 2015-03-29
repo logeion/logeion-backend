@@ -18,10 +18,10 @@ type = 'latin'
 caps = 'source'
 convert_xml = False
 
-def parse(dico_path):
+def parse(dico_path, log, log_error):
     datafile = dico_path+'/friezedennison.txt'
     dico = []
-    tobelogged = {'warning': [], 'info': []}
+    errors_occurred = False
 
     with open(datafile) as infh:
         reader = csv.reader(infh, delimiter='\t', quotechar='"')
@@ -34,8 +34,9 @@ def parse(dico_path):
                 attrs = {'head': head, 'content': content, 'orth_orig': orth_orig}
                 dico.append(attrs)
             except(Exception), e:
-                tobelogged['warning'].append("%s couldn't parse line \"%s\"...: %s" \
-                % (datafile.split('/')[-1], '\t'.join(row)[:50], e))
+                log_error("%s couldn't parse line \"%s\"...: %s" \
+                    % (datafile.split('/')[-1], '\t'.join(row)[:50], e))
+                errors_occurred = True
 
-    tobelogged['info'].append('%s finished parsing' % datafile.split('/')[-1])
-    return dico, tobelogged
+    log('%s finished parsing' % datafile.split('/')[-1])
+    return dico, errors_occurred

@@ -16,15 +16,20 @@ type = 'greek'
 caps = 'precapped'
 convert_xml = False
 
-def parse(dico_path):
+def parse(dico_path, log, log_error):
     xmlfile = dico_path+'/shortdefs.dat'
     dico = []
-    tobelogged = {'warning': [], 'info': []}
+    errors_occurred = False
     
     for line in open(xmlfile):
-        head, content = line.strip().split('\t')
-        attrs = {'head': head, 'content': content}
-        dico.append(attrs)
-    tobelogged['info'].append('%s finished parsing' % xmlfile.split('/')[-1])
+        try:
+            head, content = line.strip().split('\t')
+            attrs = {'head': head, 'content': content}
+            dico.append(attrs)
+        except(Exception), e:
+            log_error("%s couldn't parse line \"%s\"...: %s" \
+                % (xmlfile.split('/')[-1], str(entry).decode('utf-8')[:50], str(e)))
+            errors_occurred = True
+    log('%s finished parsing' % xmlfile.split('/')[-1])
     dico = sorted(dico, key=lambda e: e['head'])
-    return dico, tobelogged
+    return dico, errors_occurred

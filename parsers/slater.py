@@ -29,10 +29,10 @@ end_entry = re.compile('</div2>')
 find_orth = re.compile('orth_orig="([^"]+)"')
 
 # Main method
-def parse(dico_path):
+def parse(dico_path, log, log_error):
     dico_data = sorted(glob(dico_path+'/pindar_dico*'))
     dico = []
-    tobelogged = {'warning': [], 'info': []}
+    errors_occurred = False
     
     content = ''
     begin = False
@@ -64,12 +64,13 @@ def parse(dico_path):
                                 attrs = {'head': each.strip(), 'content': content.strip()}
                                 dico.append(attrs)
                 except(Exception), e:
-                    tobelogged['warning'].append("%s couldn't parse line \"%s\"...: %s" \
-                    % (xmlfile.split('/')[-1], content[:50], e))
+                    log_error("%s couldn't parse line \"%s\"...: %s" \
+                        % (xmlfile.split('/')[-1], content[:50], e))
+                    errors_occurred = True 
                 
                 (headword, content) = ('', '')
                 begin = False
                 
-        tobelogged['info'].append('%s finished parsing' % xmlfile.split('/')[-1])
+        log('%s finished parsing' % xmlfile.split('/')[-1])
 
-    return dico, tobelogged
+    return dico, errors_occurred

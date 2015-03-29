@@ -111,10 +111,10 @@ def check_chapter(head, chapter):
         raise Exception('lemma not in chapter_zero: '+head.encode('utf-8'))
 
 # Main method
-def parse(dico_path):
+def parse(dico_path, log, log_error):
     dico_data = sorted(glob(dico_path+'/ltrl*'))
     dico = []
-    tobelogged = {'warning': [], 'info': []}
+    errors_occurred = False
     
     begin = False
     for xmlfile in dico_data:
@@ -147,11 +147,12 @@ def parse(dico_path):
                             attrs = {'head': head, 'content': content, 'chapter': chapter}
                             dico.append(attrs)
                 except(Exception), e:
-                    tobelogged['warning'].append("%s couldn't parse line \"%s\"...: %s" \
-                    % (xmlfile.split('/')[-1], content[:50], e))            
+                    log_error("%s couldn't parse line \"%s\"...: %s" \
+                        % (xmlfile.split('/')[-1], content[:50], e))            
+                    errors_occurred = True
                 (head, content, chapter) = ('', '', '')
                 begin = False
             
-        tobelogged['info'].append('%s finished parsing' % xmlfile.split('/')[-1])
+        log('%s finished parsing' % xmlfile.split('/')[-1])
         
-    return dico, tobelogged
+    return dico, errors_occurred

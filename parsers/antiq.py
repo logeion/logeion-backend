@@ -61,10 +61,10 @@ def fix_headword(head_match, content):
     return (headword, content)
 
 # Main method
-def parse(dico_path):
+def parse(dico_path, log, log_error):
     dico_data = sorted(glob(dico_path+'/antiquities_dico*'))
     dico = []
-    tobelogged = {'warning': [], 'info': []}
+    errors_occurred = False
     
     begin = False
     label_found = False
@@ -90,8 +90,9 @@ def parse(dico_path):
                     attrs = {'head': headword, 'content': content}
                     dico.append(attrs)
                 except(Exception), e:
-                    tobelogged['warning'].append("%s couldn't parse line \"%s\"...: %s" \
-                    % (xmlfile.split('/')[-1], content[:50], e))
+                    log_warning("%s couldn't parse line \"%s\"...: %s" \
+                        % (xmlfile.split('/')[-1], content[:50], e))
+                    errors_occurred = True
                 (headword, content) = ('', '')
                 begin = False
                 label_found = False
@@ -99,6 +100,6 @@ def parse(dico_path):
                 line = remove_headfig.sub('', line)
                 content += line
         
-        tobelogged['info'].append('%s finished parsing' % xmlfile.split('/')[-1])
+        log('%s finished parsing' % xmlfile.split('/')[-1])
 
-    return dico, tobelogged
+    return dico, errors_occurred

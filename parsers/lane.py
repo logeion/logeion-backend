@@ -55,10 +55,10 @@ def clean_head(head):
     return new_head.strip()
 
 # Main method
-def parse(dico_path):
+def parse(dico_path, log, log_error):
     dico_data = sorted(glob(dico_path+'/TopResBoek.xml'))
     dico = []
-    tobelogged = {'warning': [], 'info': []}
+    errors_occurred = False
 
     for xmlfile in dico_data:
         read_in = open(xmlfile).read()
@@ -71,10 +71,11 @@ def parse(dico_path):
                 attrs = {'head': head, 'content': entry}
                 dico.append(attrs)
             except(Exception), e:
-                tobelogged['warning'].append("%s couldn't parse line \"%s\"...: %s" \
-                % (xmlfile.split('/')[-1], entry[:50], e))
+                log_error("%s couldn't parse line \"%s\"...: %s" \
+                    % (xmlfile.split('/')[-1], entry[:50], e))
+                errors_occurred = True
             head = ''
 
-        tobelogged['info'].append('%s finished parsing' % xmlfile.split('/')[-1])
+        log('%s finished parsing' % xmlfile.split('/')[-1])
 
-    return dico, tobelogged
+    return dico, errors_occurred

@@ -45,10 +45,10 @@ def clean_headword(headword, content):
     return headword
 
 # Main method
-def parse(dico_path):
+def parse(dico_path, log, log_error):
     dico_data = sorted(glob(dico_path+'/greatscott*'))
     dico = []
-    tobelogged = {'warning': [], 'info': []}
+    errors_occurred = False
 
     for xmlfile in dico_data:
         content = ''
@@ -73,11 +73,12 @@ def parse(dico_path):
                 if not re.search('λέγω =.+?λέχω', headword) and re.search('<div2 id', content):
                     dico.append(attrs)
             except(Exception), e:
-                tobelogged['warning'].append("%s couldn't parse line \"%s\"...: %s; (head_tags = %s, orth_orig = %s)" \
-                % (xmlfile.split('/')[-1], content[:50], e, str(head_tags), str(orth_orig)))
+                log_error("%s couldn't parse line \"%s\"...: %s; (head_tags = %s, orth_orig = %s)" \
+                    % (xmlfile.split('/')[-1], content[:50], e, str(head_tags), str(orth_orig)))
+                errors_occurred = True
             (headword, content) = ('', '')
             split_flag = False
             
-        tobelogged['info'].append('%s finished parsing' % xmlfile.split('/')[-1])
+        log('%s finished parsing' % xmlfile.split('/')[-1])
   
-    return dico, tobelogged
+    return dico, errors_occurred
