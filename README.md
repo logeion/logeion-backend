@@ -54,6 +54,36 @@ Logeion directory (i.e. /Users/Shared/Logeion_parsers on stephanus).
     `new_dvlg-wheel.sqlite` in your current directory will overwrite whatever dictionaries you are parsing.
 
 
+The easy way to update Logeion
+------------------------------
+
+The `build.sh` script runs the process for creating a new/updating a current Logeion database.
+It is configured using a config file which it looks for by default in the same directory as
+`build.sh` but with the name `build.config`. The location of the config file as well as the
+directory containing the various Logeion scripts can both be set on the command line (run
+`build.sh -h` for more info).
+
+The config file should contain at least the following entries in the same format as below
+(i.e. "<variable>=<value>"):
+
+    latin_lexicon=path/to/latin/lexicon/db
+    greek_lexicon=path/to/greek/lexicon/db
+    dico_root=path/to/dictionary/folder
+    logeion_root=path/to/logeion_parse/parent
+
+The following values are optional:
+
+    logeion_args="arg1 arg2 ..."                  (default: "--all")
+    lemmastoknow=path/to/lemmastoknow/db          (default: "")
+
+To run, just run the `build.sh` script like you would any other batch script.
+You can add any additional values/lines to `build.config` and use them in the `build.sh` script.
+
+NB: The config file is run as a script inside the `build.sh` script; therefore,
+1) variables should follow bash naming rules and syntax, and 2) **make sure that this script
+is in no way visible to an outside actor**, e.g. through a web service.
+
+
 Adding a new dictionary
 -----------------------
 
