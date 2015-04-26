@@ -6,7 +6,37 @@ add your own dictionaries/try out Logeion for yourself; instructions for doing s
 <a href="#deploying-logeion">at the bottom</a> of this README.
 
 
-Process for updating Logeion
+Updating Logeion - the easy way
+------------------------------
+
+The `build.sh` script runs the process for creating a new/updating a current Logeion database.
+It is configured using a config file which it looks for by default in the same directory as
+`build.sh` but with the name `build.config`. The location of the config file as well as the
+directory containing the various Logeion scripts can both be set on the command line (run
+`build.sh -h` for more info).
+
+The config file should contain at least the following entries in the same format as below
+(i.e. `<variable>=<value>`):
+
+    latin_lexicon=path/to/latin/lexicon/db
+    greek_lexicon=path/to/greek/lexicon/db
+    dico_root=path/to/dictionary/folder
+    logeion_root=path/to/logeion_parse/parent
+
+The following values are optional:
+
+    logeion_args="arg1 arg2 ..."                  (default: "--all")
+    lemmastoknow=path/to/lemmastoknow/db          (default: "")
+
+To run, just run the `build.sh` script like you would any other batch script.
+You can add any additional values/lines to `build.config` and use them in the `build.sh` script.
+
+NB: The config file is run as a script inside the `build.sh` script; therefore,
+1) variables should follow bash naming rules and syntax, and 2) **make sure that this script
+is in no way visible to an outside actor**, e.g. through a web service.
+
+
+Updating Logeion - the whole shebang
 ----------------------------
 
 **NB:** If you're running any of the Logeion db-building scripts, run them in the top-level
@@ -54,36 +84,6 @@ Logeion directory (i.e. /Users/Shared/Logeion_parsers on stephanus).
     `new_dvlg-wheel.sqlite` in your current directory will overwrite whatever dictionaries you are parsing.
 
 
-The easy way to update Logeion
-------------------------------
-
-The `build.sh` script runs the process for creating a new/updating a current Logeion database.
-It is configured using a config file which it looks for by default in the same directory as
-`build.sh` but with the name `build.config`. The location of the config file as well as the
-directory containing the various Logeion scripts can both be set on the command line (run
-`build.sh -h` for more info).
-
-The config file should contain at least the following entries in the same format as below
-(i.e. "<variable>=<value>"):
-
-    latin_lexicon=path/to/latin/lexicon/db
-    greek_lexicon=path/to/greek/lexicon/db
-    dico_root=path/to/dictionary/folder
-    logeion_root=path/to/logeion_parse/parent
-
-The following values are optional:
-
-    logeion_args="arg1 arg2 ..."                  (default: "--all")
-    lemmastoknow=path/to/lemmastoknow/db          (default: "")
-
-To run, just run the `build.sh` script like you would any other batch script.
-You can add any additional values/lines to `build.config` and use them in the `build.sh` script.
-
-NB: The config file is run as a script inside the `build.sh` script; therefore,
-1) variables should follow bash naming rules and syntax, and 2) **make sure that this script
-is in no way visible to an outside actor**, e.g. through a web service.
-
-
 Adding a new dictionary
 -----------------------
 
@@ -110,6 +110,10 @@ Python function and other data to parse the source files and provide necessary m
     them to all-lowercase in the output (but keep them the same in the actual entry). `logeion_parse.py`
     runs a routine that attempts to guess proper capitalization based on other similar lemmas, and might
     not work correctly if the lemmas for a given directory are all capitalized.
+        - There is a parser template (appropriately) named PARSER_TEMPLATE.py on the Sourceforge site
+          (<a href="http://sourceforge.net/projects/logeion/files/?source=navbar">here</a>) that has the
+          basic structure of a parser filled out. Fill in the properties and the the code block according
+          to the instructions to create a valid parser.
 *   Regarding clean-up: the standard is to not have diacritics at all in the Latin
     lemmas (e.g. macrons, breves, circumflexes, etc.).  For Greek lemmas, get rid of
     anything that isn't an accent, and consult Helma if entries have multiple accents
