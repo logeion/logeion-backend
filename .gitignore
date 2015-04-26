@@ -36,9 +36,10 @@ nosetests.xml
 # Translations
 *.mo
 
-# grade-specific
+# Logeion/Perseus-specific
 dayj
 dictionaries
 logs
 tests
 build.config
+TODO
