@@ -1,3 +1,8 @@
+"""
+Sample entry:
+
+(Not shown here)
+"""
 name = 'hrvmatlat'
 type = 'latin'
 caps = 'precapped'

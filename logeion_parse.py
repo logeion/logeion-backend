@@ -185,7 +185,6 @@ def clean_xml_and_convert(dico_parsed):
     for i in range(len(dico_parsed)):
         content = dico_parsed[i]['content']
         content = unescape(content)
-        #assert type(content) == unicode
         logging.debug('Cleaning/converting entry ' + dico_parsed[i]['head'])
         logging.debug('Entry ' + dico_parsed[i]['head'] + ' has data:\n' + content.encode('utf-8'))
         if content is None:
@@ -454,8 +453,6 @@ def main():
             sys.stdout.write('\t%s:%suncaught exception; check log and parser. Dico not loaded.\n' % (dico, spcs))
             sys.stdout.flush()
         else: 
-            # Logs errors, etc. from parsing dico
-
             # This little bit comes from the mix of unicode and str types that
             # are typical of Python 2.x; rather than expect one type from the
             # parsers, we just convert everything to UTF-8-encoded strings here
