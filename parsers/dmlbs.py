@@ -14,7 +14,6 @@ import re
 import os.path
 import StringIO
 from lxml import etree
-from apply_css import apply_css
 
 name = 'DMLBS'
 type = 'latin'
@@ -46,12 +45,14 @@ def clean_content(content):
 # We shouldn't run into any aliasing issues here - if we extract a loc's sibling and add it as the last
 # child to loc's parent, then when that sibling shows up in this loop the loc.nextSibling test will fail
 def fix_sibling_locs(entry):
-    locs = entry.findAll('loc')
+    soup = BeautifulStoneSoup(entry)
+    locs = soup.findAll('loc')
     for loc in locs:
         if loc.nextSibling and hasattr(loc.nextSibling, 'name') and loc.nextSibling.name == 'loc':
             loc_sibling = loc.nextSibling.extract()
             type_child = loc.find('type')
             type_child.append(loc_sibling)
+    return str(soup)
 
 # This is a fix for a strange formatting issue that comes up in the dictionary: basically,
 # we need 2 separate CSS pseudo-element rules for qt depending on whether or not it has an
@@ -89,8 +90,7 @@ def parse(dico_path, log, log_warning):
                     log('Marking qt tags with empty v tags')
                     content = fix_empty_v(content)
                     log('Fixing sibling locs')
-                    fix_sibling_locs(soup)
-                    content = str(soup)
+                    content = fix_sibling_locs(content)
 
             dico.append({'head': head,
                          'content': content})
