@@ -15,6 +15,7 @@ import unicodedata
 import htmlentitydefs
 import os.path
 import inspect
+import itertools
 
 try:
     from parsers import *
@@ -22,7 +23,7 @@ except(Exception), e:
     print '%s: error: import failed: %s' % (sys.argv[0], str(e))
     sys.exit(-1)
 
-class DicosByType:
+class DicoInfo:
     all_dicos = {}
     latin = []
     greek = []
@@ -31,6 +32,7 @@ class DicosByType:
     cap_source = []
     convert_xml = []
     disabled = []
+    max_dico_name_len = 0
 
     @classmethod
     def initialize(self):
@@ -51,8 +53,13 @@ class DicosByType:
                                    if hasattr(d, 'convert_xml') and d.convert_xml]
         self.disabled = [d.name for d in self.all_dicos.values() \
                                 if hasattr(d, 'enabled') and not d.enabled]
+        max_len = 0
+        for dico in itertools.chain(*[self.latin, self.greek, self.sidebar]):
+            if len(dico) > max_len:
+                max_len = len(dico)
+        self.max_dico_name_len = max_len
 
-DicosByType.initialize()
+DicoInfo.initialize()
 
 # Some basic globals: usage string, Greek-to-Roman map, and entity-to-Unicode map
 
@@ -298,7 +305,7 @@ def dico_loader(dico, entries, modify=False):
     if not entries: # Usually due to parser error
     	sys.stdout.flush()
         return False
-    elif dico not in DicosByType.sidebar:
+    elif dico not in DicoInfo.sidebar:
         c.execute('delete from Entries where dico=(?)', (dico,))
         for entry in entries:
             # Take entities out of all values
@@ -327,8 +334,8 @@ def main():
 
     # Parse command-line arguments
     dicos_to_parse = {}
-    flag2dicos = {'--greek': DicosByType.greek,     '--latin': DicosByType.latin,
-                  '--sidebar': DicosByType.sidebar, '--all': DicosByType.all_dicos.keys()}
+    flag2dicos = {'--greek': DicoInfo.greek,     '--latin': DicoInfo.latin,
+                  '--sidebar': DicoInfo.sidebar, '--all': DicoInfo.all_dicos.keys()}
     dbname = 'new_dvlg-wheel.sqlite'
     dico_root = './dictionaries'
     notdbs = None
@@ -352,21 +359,21 @@ def main():
             dico_root = args[i+1]
             i += 1
         elif args[i] == '--all': # parse all dicos
-            dicos_to_parse.update([(k,DicosByType.all_dicos[k]) for k in DicosByType.latin])
-            dicos_to_parse.update([(k,DicosByType.all_dicos[k]) for k in DicosByType.greek])
-            dicos_to_parse.update([(k,DicosByType.all_dicos[k]) for k in DicosByType.sidebar])
+            dicos_to_parse.update([(k,DicoInfo.all_dicos[k]) for k in DicoInfo.latin])
+            dicos_to_parse.update([(k,DicoInfo.all_dicos[k]) for k in DicoInfo.greek])
+            dicos_to_parse.update([(k,DicoInfo.all_dicos[k]) for k in DicoInfo.sidebar])
         elif args[i] == '--latin': # parse Latin/English dicos
-            dicos_to_parse.update([(k,DicosByType.all_dicos[k]) for k in DicosByType.latin])
+            dicos_to_parse.update([(k,DicoInfo.all_dicos[k]) for k in DicoInfo.latin])
         elif args[i] == '--greek': # parse Greek dicos
-            dicos_to_parse.update([(k,DicosByType.all_dicos[k]) for k in DicosByType.greek])
+            dicos_to_parse.update([(k,DicoInfo.all_dicos[k]) for k in DicoInfo.greek])
         elif args[i] == '--sidebar': # parse textbooks
-            dicos_to_parse.update([(k,DicosByType.all_dicos[k]) for k in DicosByType.sidebar])
+            dicos_to_parse.update([(k,DicoInfo.all_dicos[k]) for k in DicoInfo.sidebar])
         elif args[i] == '--not': # ignore the following dico
             notdbs = args[i+1].split(',')
             i += 1
         else: # all other args
-            if args[i] in DicosByType.all_dicos:
-                dicos_to_parse[args[i]] = DicosByType.all_dicos[args[i]]
+            if args[i] in DicoInfo.all_dicos:
+                dicos_to_parse[args[i]] = DicoInfo.all_dicos[args[i]]
             else:
                 print >> sys.stderr, '%s: error: dico/option %s not recognized' \
                     % (prog, args[i])
@@ -379,7 +386,7 @@ def main():
             if ndb in dicos_to_parse:
                 del dicos_to_parse[ndb]
                 print 'Not processing %s' % ndb
-    for dd in DicosByType.disabled:
+    for dd in DicoInfo.disabled:
         if dd in dicos_to_parse:
             del dicos_to_parse[dd]
 
@@ -400,9 +407,9 @@ def main():
 
     # Will skip creating Latin/GreekHeadwords if nothing has changed
     # in either (same with capitalization)
-    parsing_latin = any([k in DicosByType.latin for k in dicos_to_parse])
-    parsing_greek = any([k in DicosByType.greek for k in dicos_to_parse])
-    performing_capitalization = any([k in DicosByType.uncapped    for k in dicos_to_parse])
+    parsing_latin = any([k in DicoInfo.latin for k in dicos_to_parse])
+    parsing_greek = any([k in DicoInfo.greek for k in dicos_to_parse])
+    performing_capitalization = any([k in DicoInfo.uncapped    for k in dicos_to_parse])
 
 
     #######################
@@ -472,7 +479,7 @@ def main():
             # Loads entries to SQLite table
             sys.stdout.write('\t%s:%sloading\r' % (dico, spcs))
             sys.stdout.flush()
-            if dico in DicosByType.convert_xml:
+            if dico in DicoInfo.convert_xml:
                 dico_parsed = clean_xml_and_convert(dico_parsed)
             loaded_successfully = dico_loader(dico, dico_parsed, modify)
             if errors_occurred:
@@ -495,8 +502,8 @@ def main():
         
         # Grab all source dico entries
         query = 'select distinct head, dico from Entries where '
-        query += ' or '.join(['dico=(?)']*len(DicosByType.cap_source)) # "...where dico=(?) or dico=(?) or..."
-        c.execute(query, DicosByType.cap_source)
+        query += ' or '.join(['dico=(?)']*len(DicoInfo.cap_source)) # "...where dico=(?) or dico=(?) or..."
+        c.execute(query, DicoInfo.cap_source)
         all_source_entries = c.fetchall()
         capitalization_sources = {}
         
@@ -508,7 +515,7 @@ def main():
                 capitalization_sources[entry[0].lower()].append(entry)
         
         # Iterate over uncapped dicos
-        for ucd in DicosByType.uncapped:
+        for ucd in DicoInfo.uncapped:
             spcs = ' '*(25-len(ucd))
             sys.stdout.write('\t%s:%squerying\r' % (ucd, spcs))
             sys.stdout.flush()
@@ -595,7 +602,7 @@ def main():
         sys.stdout.write('\tLatinHeadwords:%screating \r' % spcs)
         sys.stdout.flush()
 
-        for dico in DicosByType.latin:
+        for dico in DicoInfo.latin:
             c.execute('insert into Temp select lookupform from Entries where dico=(?)',\
             (dico,))
 
@@ -622,7 +629,7 @@ def main():
                          create table Transliterated (normhead text, transhead text); \
                          create index trans_index on Transliterated (transhead);')
 
-        for dico in DicosByType.greek:
+        for dico in DicoInfo.greek:
             c.execute('insert into Temp select lookupform from Entries where dico=(?)', (dico,))
        
         # Grab all distinct Greek headwords
